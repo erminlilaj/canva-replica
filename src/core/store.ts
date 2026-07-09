@@ -31,7 +31,7 @@ interface PosterState {
   selectBlock: (id?: string) => void;
   setPage: (page: { size?: PageSize; orientation?: PageOrientation }) => void;
   setDocumentFonts: (fonts: { heading?: string; body?: string }) => void;
-  addBlock: (type: BlockType) => void;
+  addBlock: (type: BlockType, at?: { x: number; y: number }) => void;
   updateBlock: (id: string, patch: Partial<Block>, options?: { commit?: boolean; historyBase?: PosterDoc }) => void;
   updateBlockData: <T extends Block>(
     id: string,
@@ -98,10 +98,13 @@ export const usePosterStore = create<PosterState>((set, get) => ({
         fonts: { ...state.doc.fonts, ...fonts },
       }),
     ),
-  addBlock: (type) =>
+  addBlock: (type, at) =>
     set((state) => {
       const page = pageSizeMm(state.doc.page.size, state.doc.page.orientation);
-      const block = makeDefaultBlock(type, firstFreeFrame(state.doc.blocks.length, page));
+      const baseFrame = at
+        ? clampFrame({ x: at.x, y: at.y, w: Math.min(92, page.w - 20), h: "auto" }, page)
+        : firstFreeFrame(state.doc.blocks.length, page);
+      const block = makeDefaultBlock(type, baseFrame);
       return {
         ...withHistory(state, { ...state.doc, blocks: [...state.doc.blocks, block] }),
         selectedId: block.id,

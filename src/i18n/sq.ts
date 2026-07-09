@@ -39,7 +39,7 @@ export const sq = {
   },
   palette: {
     title: "Shto në poster",
-    hint: "Kliko një bllok për ta shtuar në vendin e parë bosh.",
+    hint: "Kliko një bllok për ta shtuar, ose tërhiqe (drag) drejt në poster.",
     text: "Tekst",
     box: "Kuti",
     divider: "Vijë",

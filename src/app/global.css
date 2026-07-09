@@ -378,6 +378,22 @@ input:focus-visible,
   text-align: left;
 }
 
+.palette-ghost {
+  position: fixed;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #0f4c9a;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(20, 31, 47, 0.2);
+  font-weight: 700;
+  color: #0f4c9a;
+  pointer-events: none;
+}
+
 .canvas-stage {
   overflow: auto;
   padding: 34px;
