@@ -204,10 +204,12 @@ export const usePosterStore = create<PosterState>((set, get) => ({
       if (state.selectedIds.length === 0) return state;
       const page = pageSizeMm(state.doc.page.size, state.doc.page.orientation);
       const ids = new Set(state.selectedIds);
+      const movable = state.doc.blocks.some((block) => ids.has(block.id) && !block.locked);
+      if (!movable) return state;
       const doc = {
         ...state.doc,
         blocks: state.doc.blocks.map((block) =>
-          ids.has(block.id)
+          ids.has(block.id) && !block.locked
             ? ({ ...block, frame: clampFrame({ ...block.frame, x: block.frame.x + dx, y: block.frame.y + dy }, page) } as Block)
             : block,
         ),

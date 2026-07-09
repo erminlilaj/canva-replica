@@ -446,6 +446,22 @@ input:focus-visible,
   left: 0;
 }
 
+.lock-badge {
+  position: absolute;
+  z-index: 2;
+  top: -22px;
+  left: 0;
+  padding: 2px;
+  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #526173;
+}
+
+.print-block .lock-badge {
+  display: none;
+}
+
 .grab-handle::before {
   content: "";
   display: block;

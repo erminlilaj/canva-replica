@@ -49,7 +49,13 @@ function validateBlock(value: unknown): Block | null {
   if (!isRecord(value) || typeof value.id !== "string" || !blockTypes.includes(value.type as BlockType)) return null;
   const frame = validateFrame(value.frame);
   if (!frame || !isRecord(value.data)) return null;
-  const base = { id: value.id, type: value.type as BlockType, frame, style: validateStyle(value.style) };
+  const base = {
+    id: value.id,
+    type: value.type as BlockType,
+    frame,
+    style: validateStyle(value.style),
+    locked: typeof value.locked === "boolean" ? value.locked : undefined,
+  };
   const data = value.data;
 
   if (base.type === "text") return { ...base, type: "text", data: { text: asString(data.text) } };

@@ -89,6 +89,8 @@ export const sq = {
     right: "Djathtas",
     forward: "Përpara",
     backward: "Mbrapa",
+    lock: "Kyç pozicionin",
+    unlock: "Zhkyç pozicionin",
     newColumnName: (index: number) => `Kolona ${index}`,
     multiSelected: (count: number) => `${count} blloqe të zgjedhura`,
     newChecklistItem: "Pikë e re",
@@ -101,6 +103,7 @@ export const sq = {
     move: "Lëviz",
     resize: "Ndrysho madhësinë",
     pan: "Lëviz faqen",
+    locked: "Blloku është i kyçur",
   },
   print: {
     hint: "Zgjidh 'Ruaj si PDF' dhe formatin e faqes në dialogun e printimit.",

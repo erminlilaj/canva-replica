@@ -1,4 +1,5 @@
 import { PointerEvent, WheelEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Lock } from "lucide-react";
 import { BlockRenderer } from "../blocks/registry";
 import { PX_PER_MM, clampFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "../core/geometry";
 import { themes } from "../core/themes";
@@ -165,7 +166,7 @@ export function Canvas() {
     const blockHeightMm = (item: Block) =>
       typeof item.frame.h === "number" ? item.frame.h : measuredHeights.get(item.id) ?? 20;
 
-    const groupIds = isGroupMove ? selectedIds : [block.id];
+    const groupIds = isGroupMove ? selectedIds.filter((id) => !doc.blocks.find((item) => item.id === id)?.locked) : [block.id];
     const groupStartFrames = new Map<string, Frame>();
     for (const id of groupIds) {
       const other = doc.blocks.find((item) => item.id === id);
@@ -327,45 +328,52 @@ export function Canvas() {
                 else selectBlock(block.id);
               }}
             >
-              <button
-                className="grab-handle"
-                aria-label={sq.canvas.move}
-                title={sq.canvas.move}
-                onPointerDown={(event) => startDrag(event, block, "move")}
-                onPointerMove={moveDrag}
-                onPointerUp={endDrag}
-                onPointerCancel={endDrag}
-              />
+              {!block.locked ? (
+                <button
+                  className="grab-handle"
+                  aria-label={sq.canvas.move}
+                  title={sq.canvas.move}
+                  onPointerDown={(event) => startDrag(event, block, "move")}
+                  onPointerMove={moveDrag}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                />
+              ) : null}
+              {block.locked ? <Lock className="lock-badge" size={14} aria-label={sq.canvas.locked} /> : null}
               <BlockRenderer block={block} />
-              <button
-                className="resize-handle resize-se"
-                aria-label={sq.canvas.resize}
-                title={sq.canvas.resize}
-                onPointerDown={(event) => startDrag(event, block, "resize-se")}
-                onPointerMove={moveDrag}
-                onPointerUp={endDrag}
-                onPointerCancel={endDrag}
-              />
-              {typeof block.frame.h === "number" ? (
+              {!block.locked ? (
                 <>
                   <button
-                    className="resize-handle resize-e"
+                    className="resize-handle resize-se"
                     aria-label={sq.canvas.resize}
                     title={sq.canvas.resize}
-                    onPointerDown={(event) => startDrag(event, block, "resize-e")}
+                    onPointerDown={(event) => startDrag(event, block, "resize-se")}
                     onPointerMove={moveDrag}
                     onPointerUp={endDrag}
                     onPointerCancel={endDrag}
                   />
-                  <button
-                    className="resize-handle resize-s"
-                    aria-label={sq.canvas.resize}
-                    title={sq.canvas.resize}
-                    onPointerDown={(event) => startDrag(event, block, "resize-s")}
-                    onPointerMove={moveDrag}
-                    onPointerUp={endDrag}
-                    onPointerCancel={endDrag}
-                  />
+                  {typeof block.frame.h === "number" ? (
+                    <>
+                      <button
+                        className="resize-handle resize-e"
+                        aria-label={sq.canvas.resize}
+                        title={sq.canvas.resize}
+                        onPointerDown={(event) => startDrag(event, block, "resize-e")}
+                        onPointerMove={moveDrag}
+                        onPointerUp={endDrag}
+                        onPointerCancel={endDrag}
+                      />
+                      <button
+                        className="resize-handle resize-s"
+                        aria-label={sq.canvas.resize}
+                        title={sq.canvas.resize}
+                        onPointerDown={(event) => startDrag(event, block, "resize-s")}
+                        onPointerMove={moveDrag}
+                        onPointerUp={endDrag}
+                        onPointerCancel={endDrag}
+                      />
+                    </>
+                  ) : null}
                 </>
               ) : null}
             </div>

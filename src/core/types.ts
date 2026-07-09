@@ -45,6 +45,7 @@ export interface BlockBase {
   type: BlockType;
   frame: Frame;
   style?: BlockStyleOverrides;
+  locked?: boolean;
 }
 
 export interface TextBlock extends BlockBase {

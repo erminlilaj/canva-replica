@@ -89,6 +89,19 @@ describe("store: multi-select", () => {
   });
 });
 
+describe("store: locked blocks", () => {
+  it("nudgeSelectedBlock leaves a locked block's frame untouched", () => {
+    const { updateBlock, selectBlock, nudgeSelectedBlock } = usePosterStore.getState();
+    updateBlock("text-1", { locked: true });
+    selectBlock("text-1");
+
+    const before = usePosterStore.getState().doc.blocks.find((b) => b.id === "text-1")!.frame;
+    nudgeSelectedBlock(5, 5);
+    const after = usePosterStore.getState().doc.blocks.find((b) => b.id === "text-1")!.frame;
+    expect(after).toEqual(before);
+  });
+});
+
 describe("store: duplicateBlock", () => {
   it("deep-copies a block so mutating the copy's data does not touch the original", () => {
     const { duplicateBlock, updateBlockData } = usePosterStore.getState();

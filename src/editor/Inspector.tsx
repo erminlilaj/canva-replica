@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Copy, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Lock, LockOpen, Trash2, Upload } from "lucide-react";
 import { sq } from "../i18n/sq";
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
@@ -277,6 +277,10 @@ export function Inspector() {
         <button onClick={() => moveSelectedBlockLayer("backward")}>
           <ArrowDown size={18} />
           {sq.inspector.backward}
+        </button>
+        <button onClick={() => updateBlock(block.id, { locked: !block.locked })}>
+          {block.locked ? <LockOpen size={18} /> : <Lock size={18} />}
+          {block.locked ? sq.inspector.unlock : sq.inspector.lock}
         </button>
         <button onClick={() => duplicateBlock(block.id)}>
           <Copy size={18} />

@@ -111,7 +111,7 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] Icon picker: wire `TableBlock.leadingIcon` and TeamList row icons to a curated ~30-icon Lucide subset. *(Team icon applies to the whole member list rather than per-row — the reference template already uses one icon for every row, and per-member pickers would exceed the ~6-control inspector guideline in AGENTS.md.)*
 - [x] Drag-from-palette in addition to click-to-add (drop at pointer position). Only reintroduce dnd-kit if built; otherwise reuse the existing pointer-drag machinery. *(Custom pointer tracking, no dnd-kit; verify live in the final end-to-end pass.)*
 - [x] Multi-select (shift-click) + group move. *(Store field renamed `selectedId` → `selectedIds: string[]`; Inspector shows shared duplicate/delete actions when >1 selected, falls back to the normal single-block panel otherwise. Resize handles and layer reorder still act on one block at a time.)*
-- [ ] Lock block toggle.
+- [x] Lock block toggle.
 - [ ] "Dyfisho posterin" (duplicate whole poster) in gallery.
 - [ ] First-launch coach marks (max 3 tooltips: palette → canvas → export).
 
