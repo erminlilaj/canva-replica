@@ -22,6 +22,7 @@ const blankPoster: PosterDoc = {
 export function Gallery() {
   const openEditor = usePosterStore((state) => state.openEditor);
   const posterIndex = usePosterStore((state) => state.posterIndex);
+  const posterIndexLoaded = usePosterStore((state) => state.posterIndexLoaded);
   const setPosterIndex = usePosterStore((state) => state.setPosterIndex);
   const recentPoster = posterIndex[0];
 
@@ -87,9 +88,16 @@ export function Gallery() {
       </section>
       <section className="saved-posters">
         <h2>{sq.gallery.myPosters}</h2>
-        {posterIndex.length === 0 ? <p>{sq.gallery.noSavedPoster}</p> : null}
+        {!posterIndexLoaded ? (
+          <div className="saved-list" aria-hidden="true">
+            <div className="saved-row-skeleton" />
+            <div className="saved-row-skeleton" />
+          </div>
+        ) : posterIndex.length === 0 ? (
+          <p>{sq.gallery.noSavedPoster}</p>
+        ) : null}
         <div className="saved-list">
-          {posterIndex.map((poster) => (
+          {posterIndexLoaded && posterIndex.map((poster) => (
             <div className="saved-row" key={poster.id}>
               <button onClick={() => openSavedPoster(poster.id)}>
                 <strong>{poster.title}</strong>

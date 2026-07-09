@@ -12,6 +12,7 @@ export default function App() {
   const doc = usePosterStore((state) => state.doc);
   const openGallery = usePosterStore((state) => state.openGallery);
   const setPosterIndex = usePosterStore((state) => state.setPosterIndex);
+  const setPosterIndexLoaded = usePosterStore((state) => state.setPosterIndexLoaded);
   const setSaveError = usePosterStore((state) => state.setSaveError);
   const setSavedState = usePosterStore((state) => state.setSavedState);
 
@@ -22,13 +23,14 @@ export default function App() {
           setPosterIndex(migrated.index);
           return;
         }
-        loadPosterIndex().then(setPosterIndex);
+        return loadPosterIndex().then(setPosterIndex);
       })
       .catch((error: unknown) => {
         console.error(error);
         setSaveError(sq.storage.indexLoadFailed);
-      });
-  }, [setPosterIndex, setSaveError]);
+      })
+      .finally(() => setPosterIndexLoaded());
+  }, [setPosterIndex, setPosterIndexLoaded, setSaveError]);
 
   useEffect(() => {
     if (view !== "editor") return;

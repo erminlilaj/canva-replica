@@ -93,9 +93,9 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] README: add "Si ta publikosh" section + English one-paragraph summary at top for repo visitors.
 
 ### 10. App shell polish
-- [ ] Favicon + `<meta name="description">` (Albanian) + `theme-color` in `index.html`.
-- [ ] Small-viewport gate: below ~900 px width show a friendly full-screen "Postera punon më mirë në kompjuter" message instead of a broken editor.
-- [ ] Loading state: gallery reads IndexedDB async — show a skeleton, not a flash of "no posters."
+- [x] Favicon + `<meta name="description">` (Albanian) + `theme-color` in `index.html`.
+- [x] Small-viewport gate: below 980px width the editor already shows a friendly full-screen message instead of a broken editor (existing `.small-screen` rule); the gallery reflows to a single column and stays usable, so it isn't gated.
+- [x] Loading state: gallery reads IndexedDB async — show a skeleton, not a flash of "no posters."
 
 ### 11. Test floor (keep it small but real)
 - [ ] `validate.ts` tests (item 3).

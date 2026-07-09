@@ -153,6 +153,23 @@ input:focus-visible,
   color: #607083;
 }
 
+.saved-row-skeleton {
+  height: 52px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e9eef5 25%, #f4f7fb 37%, #e9eef5 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
 .saved-delete {
   padding: 0 14px;
   border-color: #efb4bc;

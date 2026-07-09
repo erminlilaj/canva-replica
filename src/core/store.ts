@@ -11,6 +11,7 @@ type View = "gallery" | "editor" | "print";
 interface PosterState {
   doc: PosterDoc;
   posterIndex: PosterSummary[];
+  posterIndexLoaded: boolean;
   saveError?: string;
   selectedId?: string;
   view: View;
@@ -23,6 +24,7 @@ interface PosterState {
   openPrint: () => void;
   setDoc: (doc: PosterDoc, commit?: boolean) => void;
   setPosterIndex: (index: PosterSummary[]) => void;
+  setPosterIndexLoaded: () => void;
   setSaveError: (message?: string) => void;
   setSavedState: (state: "saved" | "saving") => void;
   setDocTitle: (title: string, historyBase?: PosterDoc) => void;
@@ -65,6 +67,7 @@ function replaceBlock(doc: PosterDoc, id: string, updater: (block: Block) => Blo
 export const usePosterStore = create<PosterState>((set, get) => ({
   doc: ensurePosterIdentity(riskAssessmentTemplate),
   posterIndex: [],
+  posterIndexLoaded: false,
   view: "gallery",
   zoom: 0.55,
   savedState: "saved",
@@ -76,6 +79,7 @@ export const usePosterStore = create<PosterState>((set, get) => ({
   setDoc: (doc, commit = true) =>
     set((state) => (commit ? withHistory(state, doc) : { doc: touchPoster(doc), savedState: "saving" })),
   setPosterIndex: (posterIndex) => set({ posterIndex }),
+  setPosterIndexLoaded: () => set({ posterIndexLoaded: true }),
   setSaveError: (saveError) => set({ saveError }),
   setSavedState: (savedState) => set({ savedState }),
   setDocTitle: (title, historyBase) => set((state) => withHistory(state, { ...state.doc, title }, historyBase)),
