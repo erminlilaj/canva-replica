@@ -46,6 +46,22 @@ describe("validatePosterDoc", () => {
     expect(doc?.blocks).toHaveLength(1);
   });
 
+  it("accepts a table block with zero rows", () => {
+    const doc = validatePosterDoc({
+      ...validDoc,
+      blocks: [
+        {
+          id: "table-1",
+          type: "table",
+          frame: { x: 1, y: 1, w: 50, h: "auto" },
+          data: { columns: ["A", "B"], rows: [] },
+        },
+      ],
+    });
+    expect(doc?.blocks).toHaveLength(1);
+    expect(doc?.blocks[0].type === "table" && doc.blocks[0].data.rows).toEqual([]);
+  });
+
   it("drops a table block with non-array rows", () => {
     const doc = validatePosterDoc({
       ...validDoc,

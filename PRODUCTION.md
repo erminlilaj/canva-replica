@@ -48,11 +48,11 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 
 **Problem:** all removal actions (`Inspector.tsx`) are `slice(0, -1)` — deleting row 3 of 10 is impossible without destroying 4–10.
 
-- [ ] Table: on hover over a row in the canvas, show a small ✕ at the row's right edge (position: absolute, outside the table border) that deletes **that** row. Same pattern for a ✕ under each column header. Keep the inspector "add" buttons; the last-item remove buttons can go.
-- [ ] Checklist items, team members, SWOT bullets, risk ratings: same per-item ✕-on-hover treatment in their renderers.
-- [ ] Guards: tables keep ≥1 column; deleting the last row is allowed (empty tbody must render without crashing — test it).
-- [ ] All ✕ buttons: ≥ 24 px hit area, `aria-label` from `sq.ts`, hidden in PrintView (they're inside renderers — gate on a `readOnly` prop or CSS `.print-view .row-remove { display:none }`).
-- [ ] These are data edits → they go through `updateBlockData` normally (single history entry each). Verify undo restores the deleted row.
+- [x] Table: on hover over a row in the canvas, show a small ✕ at the row's right edge (position: absolute, outside the table border) that deletes **that** row. Same pattern for a ✕ under each column header. Keep the inspector "add" buttons; the last-item remove buttons can go.
+- [x] Checklist items, team members, SWOT bullets, risk ratings: same per-item ✕-on-hover treatment in their renderers.
+- [x] Guards: tables keep ≥1 column; deleting the last row is allowed (empty tbody must render without crashing — test it).
+- [x] All ✕ buttons: ≥ 24 px hit area, `aria-label` from `sq.ts`, hidden in PrintView (they're inside renderers — gate on a `readOnly` prop or CSS `.print-view .row-remove { display:none }`).
+- [x] These are data edits → they go through `updateBlockData` normally (single history entry each). Verify undo restores the deleted row.
 
 ### 5. Height resize + second handle
 

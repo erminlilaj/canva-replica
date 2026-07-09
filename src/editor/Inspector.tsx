@@ -43,18 +43,6 @@ export function Inspector() {
       rows: block.data.rows.map((row) => [...row, ""]),
     });
   };
-  const removeColumn = () => {
-    if (block.type !== "table" || block.data.columns.length <= 1) return;
-    const index = block.data.columns.length - 1;
-    updateBlockData<TableBlock>(block.id, {
-      columns: block.data.columns.filter((_, colIndex) => colIndex !== index),
-      rows: block.data.rows.map((row) => row.filter((_, colIndex) => colIndex !== index)),
-    });
-  };
-  const removeRow = () => {
-    if (block.type !== "table" || block.data.rows.length === 0) return;
-    updateBlockData<TableBlock>(block.id, { rows: block.data.rows.slice(0, -1) });
-  };
   const handleImageFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || block.type !== "image") return;
@@ -151,14 +139,11 @@ export function Inspector() {
         <div className="inspector-actions">
           <button onClick={addRow}>{sq.inspector.addRow}</button>
           <button onClick={addColumn}>{sq.inspector.addColumn}</button>
-          <button onClick={removeRow}>{sq.inspector.removeRow}</button>
-          <button onClick={removeColumn}>{sq.inspector.removeColumn}</button>
         </div>
       ) : null}
       {block.type === "checklist" ? (
         <div className="inspector-actions">
           <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: [...block.data.items, "Pikë e re"] })}>{sq.inspector.addItem}</button>
-          <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: block.data.items.slice(0, -1) })}>{sq.inspector.removeItem}</button>
         </div>
       ) : null}
       {block.type === "team" ? (
@@ -166,7 +151,6 @@ export function Inspector() {
           <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: [...block.data.members, { role: "rol", name: "Emri Mbiemri" }] })}>
             {sq.inspector.addMember}
           </button>
-          <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: block.data.members.slice(0, -1) })}>{sq.inspector.removeMember}</button>
         </div>
       ) : null}
       {block.type === "swot" ? (
@@ -184,20 +168,11 @@ export function Inspector() {
               {sq.inspector.addItem}: {column.title}
             </button>
           ))}
-          <button
-            onClick={() => {
-              const columns = block.data.columns.map((entry) => ({ ...entry, items: entry.items.slice(0, -1) }));
-              updateBlockData<SwotGridBlock>(block.id, { columns });
-            }}
-          >
-            {sq.inspector.removeItem}
-          </button>
         </div>
       ) : null}
       {block.type === "risk" ? (
         <div className="inspector-actions">
           <button onClick={() => updateBlockData<RiskCardBlock>(block.id, { ratings: [...block.data.ratings, "1 x 1 = 1"] })}>{sq.inspector.addRating}</button>
-          <button onClick={() => updateBlockData<RiskCardBlock>(block.id, { ratings: block.data.ratings.slice(0, -1) })}>{sq.inspector.removeRating}</button>
         </div>
       ) : null}
       {block.type === "image" ? (

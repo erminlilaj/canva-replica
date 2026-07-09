@@ -54,6 +54,21 @@ class BlockErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
+function RemoveButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className="inline-remove"
+      aria-label={label}
+      title={label}
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={onClick}
+    >
+      ×
+    </button>
+  );
+}
+
 function EditableText({
   value,
   className,
@@ -156,6 +171,13 @@ function TableRenderer({ block }: { block: TableBlock }) {
   const removeRow = (rowIndex: number) => {
     update<TableBlock>(block.id, { rows: block.data.rows.filter((_, index) => index !== rowIndex) });
   };
+  const removeColumn = (colIndex: number) => {
+    if (block.data.columns.length <= 1) return;
+    update<TableBlock>(block.id, {
+      columns: block.data.columns.filter((_, index) => index !== colIndex),
+      rows: block.data.rows.map((row) => row.filter((_, index) => index !== colIndex)),
+    });
+  };
   return (
     <div className="table-block" style={{ borderColor: slotColor(block), background: softColor(block) }}>
       {block.data.title ? (
@@ -168,6 +190,9 @@ function TableRenderer({ block }: { block: TableBlock }) {
           <tr>
             {block.data.columns.map((column, index) => (
               <th key={index}>
+                {block.data.columns.length > 1 ? (
+                  <RemoveButton label={sq.inspector.removeColumn} onClick={() => removeColumn(index)} />
+                ) : null}
                 <EditableText
                   value={column}
                   onCommit={(value) =>
@@ -185,11 +210,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
             <tr key={rowIndex}>
               {block.data.columns.map((_, colIndex) => (
                 <td key={`${rowIndex}-${colIndex}`}>
-                  {colIndex === 0 ? (
-                    <button className="inline-remove" type="button" aria-label={sq.inspector.removeRow} onClick={() => removeRow(rowIndex)}>
-                      ×
-                    </button>
-                  ) : null}
+                  {colIndex === 0 ? <RemoveButton label={sq.inspector.removeRow} onClick={() => removeRow(rowIndex)} /> : null}
                   <EditableText value={row[colIndex] ?? ""} onCommit={(value) => commitCell(rowIndex, colIndex, value)} />
                 </td>
               ))}
@@ -215,6 +236,17 @@ function SwotRenderer({ block }: { block: SwotGridBlock }) {
           <ul>
             {column.items.map((item, itemIndex) => (
               <li key={itemIndex}>
+                <RemoveButton
+                  label={sq.inspector.removeItem}
+                  onClick={() => {
+                    const columns = block.data.columns.map((entry, columnIndex) =>
+                      columnIndex === index
+                        ? { ...entry, items: entry.items.filter((_, currentIndex) => currentIndex !== itemIndex) }
+                        : entry,
+                    );
+                    update<SwotGridBlock>(block.id, { columns });
+                  }}
+                />
                 <EditableText
                   value={item}
                   onCommit={(value) => {
@@ -258,7 +290,13 @@ function RiskRenderer({ block }: { block: RiskCardBlock }) {
       </div>
       <div className="risk-ratings">
         {block.data.ratings.map((rating, index) => (
-          <span key={index}>{rating}</span>
+          <span key={index}>
+            <RemoveButton
+              label={sq.inspector.removeRating}
+              onClick={() => update<RiskCardBlock>(block.id, { ratings: block.data.ratings.filter((_, ratingIndex) => ratingIndex !== index) })}
+            />
+            {rating}
+          </span>
         ))}
       </div>
     </div>
@@ -277,6 +315,10 @@ function TeamRenderer({ block }: { block: TeamListBlock }) {
           <Users size={14} />
           <span>{member.role}</span>
           <strong>{member.name}</strong>
+          <RemoveButton
+            label={sq.inspector.removeMember}
+            onClick={() => update<TeamListBlock>(block.id, { members: block.data.members.filter((_, memberIndex) => memberIndex !== index) })}
+          />
         </div>
       ))}
     </div>
@@ -300,6 +342,10 @@ function ChecklistRenderer({ block }: { block: ChecklistBlock }) {
                 items: block.data.items.map((entry, itemIndex) => (itemIndex === index ? value : entry)),
               })
             }
+          />
+          <RemoveButton
+            label={sq.inspector.removeItem}
+            onClick={() => update<ChecklistBlock>(block.id, { items: block.data.items.filter((_, itemIndex) => itemIndex !== index) })}
           />
         </div>
       ))}
