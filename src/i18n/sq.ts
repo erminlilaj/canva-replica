@@ -10,6 +10,8 @@ export const sq = {
     blankDesc: "Fillo me një faqe A3 të pastër.",
     continue: "Vazhdo ku e le",
     noSavedPoster: "Nuk ka ende poster të ruajtur.",
+    modified: "Modifikuar më",
+    confirmDeletePoster: "A je i sigurt që do ta fshish këtë poster të ruajtur?",
     openTemplate: "Hap shabllonin",
   },
   toolbar: {
@@ -24,7 +26,9 @@ export const sq = {
     exportPdf: "Shkarko PDF",
     saved: "U ruajt ✓",
     saving: "Duke ruajtur...",
+    saveError: "Nuk u ruajt dot",
     theme: "Ngjyra",
+    title: "Titulli",
     pageSize: "Faqja",
     orientation: "Drejtimi",
     portrait: "Vertikal",
@@ -100,5 +104,11 @@ export const sq = {
   },
   file: {
     invalid: "Skedari nuk duket si poster i Postera.",
+  },
+  error: {
+    title: "Diçka nuk u shfaq siç duhet.",
+    body: "Posterat e ruajtur nuk janë fshirë. Kthehu te galeria dhe provo përsëri.",
+    block: "Blloku nuk u shfaq dot.",
+    back: "Kthehu te galeria",
   },
 };

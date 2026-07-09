@@ -1,3 +1,4 @@
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Check, Image, ListChecks, Minus, Square, Table2, Target, TextCursorInput, Users, Boxes, Hash } from "lucide-react";
 import type {
   Block,
@@ -34,6 +35,23 @@ export const blockIcons: Record<BlockType, typeof TextCursorInput> = {
 
 interface BlockRendererProps {
   block: Block;
+}
+
+class BlockErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) return <div className="block-error">{sq.error.block}</div>;
+    return this.props.children;
+  }
 }
 
 function EditableText({
@@ -300,15 +318,19 @@ function ImageRenderer({ block }: { block: ImageFrameBlock }) {
 }
 
 export function BlockRenderer({ block }: BlockRendererProps) {
-  if (block.type === "box") return <BoxRenderer block={block} />;
-  if (block.type === "divider") return <DividerRenderer block={block} />;
-  if (block.type === "stat") return <StatRenderer block={block} />;
-  if (block.type === "section") return <SectionRenderer block={block} />;
-  if (block.type === "table") return <TableRenderer block={block} />;
-  if (block.type === "swot") return <SwotRenderer block={block} />;
-  if (block.type === "risk") return <RiskRenderer block={block} />;
-  if (block.type === "team") return <TeamRenderer block={block} />;
-  if (block.type === "checklist") return <ChecklistRenderer block={block} />;
-  if (block.type === "image") return <ImageRenderer block={block} />;
-  return <TextRenderer block={block} />;
+  return (
+    <BlockErrorBoundary>
+      {block.type === "box" ? <BoxRenderer block={block} /> : null}
+      {block.type === "divider" ? <DividerRenderer block={block} /> : null}
+      {block.type === "stat" ? <StatRenderer block={block} /> : null}
+      {block.type === "section" ? <SectionRenderer block={block} /> : null}
+      {block.type === "table" ? <TableRenderer block={block} /> : null}
+      {block.type === "swot" ? <SwotRenderer block={block} /> : null}
+      {block.type === "risk" ? <RiskRenderer block={block} /> : null}
+      {block.type === "team" ? <TeamRenderer block={block} /> : null}
+      {block.type === "checklist" ? <ChecklistRenderer block={block} /> : null}
+      {block.type === "image" ? <ImageRenderer block={block} /> : null}
+      {block.type === "text" ? <TextRenderer block={block} /> : null}
+    </BlockErrorBoundary>
+  );
 }

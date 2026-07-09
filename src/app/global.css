@@ -16,6 +16,32 @@ body {
   font-size: 16px;
 }
 
+.error-screen {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  padding: 30px;
+  text-align: center;
+}
+
+.error-screen h1 {
+  margin: 0;
+}
+
+.block-error {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px dashed #a92738;
+  background: #fff1f2;
+  color: #a92738;
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+}
+
 button,
 input,
 select {
@@ -81,6 +107,58 @@ input:focus-visible,
   gap: 18px;
   max-width: 940px;
   margin: 0 auto;
+}
+
+.continue-section,
+.saved-posters {
+  max-width: 940px;
+  margin: 0 auto 20px;
+}
+
+.continue-card {
+  width: 100%;
+  min-height: 120px;
+  border-color: #0f4c9a;
+}
+
+.saved-posters {
+  padding-top: 8px;
+}
+
+.saved-posters h2 {
+  margin: 18px 0 12px;
+}
+
+.saved-list {
+  display: grid;
+  gap: 10px;
+}
+
+.saved-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.saved-row > button:first-child {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.saved-row small {
+  color: #607083;
+}
+
+.saved-delete {
+  padding: 0 14px;
+  border-color: #efb4bc;
+  background: #fff1f2;
+  color: #a92738;
+  font-weight: 800;
 }
 
 .template-card {
@@ -188,6 +266,14 @@ input:focus-visible,
   background: #ffffff;
 }
 
+.title-input {
+  width: 190px;
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
 .compact-picker {
   max-width: 190px;
 }
@@ -204,6 +290,10 @@ input:focus-visible,
   color: #127a49;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.save-error {
+  color: #a92738;
 }
 
 .primary-action {
@@ -761,11 +851,6 @@ input:focus-visible,
 }
 
 @media print {
-  @page {
-    size: A3 portrait;
-    margin: 0;
-  }
-
   body,
   #root,
   .print-view {

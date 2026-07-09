@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { clampFrame, firstFreeFrame, pageSizeMm } from "./geometry";
+import { ensurePosterIdentity, touchPoster } from "./document";
+import type { PosterSummary } from "./persistence";
 import type { Block, BlockType, PageOrientation, PageSize, PosterDoc, ThemeId } from "./types";
 import { makeDefaultBlock } from "./defaultBlocks";
 import { riskAssessmentTemplate } from "../templates/riskAssessment";
@@ -8,7 +10,8 @@ type View = "gallery" | "editor" | "print";
 
 interface PosterState {
   doc: PosterDoc;
-  autosavedDoc?: PosterDoc;
+  posterIndex: PosterSummary[];
+  saveError?: string;
   selectedId?: string;
   view: View;
   zoom: number;
@@ -19,8 +22,10 @@ interface PosterState {
   openEditor: (doc: PosterDoc) => void;
   openPrint: () => void;
   setDoc: (doc: PosterDoc, commit?: boolean) => void;
-  setAutosavedDoc: (doc?: PosterDoc) => void;
+  setPosterIndex: (index: PosterSummary[]) => void;
+  setSaveError: (message?: string) => void;
   setSavedState: (state: "saved" | "saving") => void;
+  setDocTitle: (title: string) => void;
   selectBlock: (id?: string) => void;
   setPage: (page: { size?: PageSize; orientation?: PageOrientation }) => void;
   setDocumentFonts: (fonts: { heading?: string; body?: string }) => void;
@@ -43,7 +48,7 @@ interface PosterState {
 
 function withHistory(state: PosterState, doc: PosterDoc, historyBase = state.doc) {
   return {
-    doc,
+    doc: touchPoster(doc),
     savedState: "saving" as const,
     past: [...state.past.slice(-99), historyBase],
     future: [],
@@ -58,19 +63,22 @@ function replaceBlock(doc: PosterDoc, id: string, updater: (block: Block) => Blo
 }
 
 export const usePosterStore = create<PosterState>((set, get) => ({
-  doc: riskAssessmentTemplate,
+  doc: ensurePosterIdentity(riskAssessmentTemplate),
+  posterIndex: [],
   view: "gallery",
   zoom: 0.55,
   savedState: "saved",
   past: [],
   future: [],
   openGallery: () => set({ view: "gallery", selectedId: undefined }),
-  openEditor: (doc) => set({ doc, view: "editor", selectedId: undefined, savedState: "saving", past: [], future: [] }),
+  openEditor: (doc) => set({ doc: touchPoster(doc), view: "editor", selectedId: undefined, savedState: "saving", saveError: undefined, past: [], future: [] }),
   openPrint: () => set({ view: "print", selectedId: undefined }),
   setDoc: (doc, commit = true) =>
-    set((state) => (commit ? withHistory(state, doc) : { doc, savedState: "saving" })),
-  setAutosavedDoc: (autosavedDoc) => set({ autosavedDoc }),
+    set((state) => (commit ? withHistory(state, doc) : { doc: touchPoster(doc), savedState: "saving" })),
+  setPosterIndex: (posterIndex) => set({ posterIndex }),
+  setSaveError: (saveError) => set({ saveError }),
   setSavedState: (savedState) => set({ savedState }),
+  setDocTitle: (title) => set((state) => withHistory(state, { ...state.doc, title })),
   selectBlock: (selectedId) => set({ selectedId }),
   setPage: (page) =>
     set((state) =>

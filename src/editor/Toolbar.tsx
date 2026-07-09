@@ -13,6 +13,7 @@ export function Toolbar() {
   const doc = usePosterStore((state) => state.doc);
   const zoom = usePosterStore((state) => state.zoom);
   const savedState = usePosterStore((state) => state.savedState);
+  const saveError = usePosterStore((state) => state.saveError);
   const openGallery = usePosterStore((state) => state.openGallery);
   const openEditor = usePosterStore((state) => state.openEditor);
   const openPrint = usePosterStore((state) => state.openPrint);
@@ -20,6 +21,7 @@ export function Toolbar() {
   const setTheme = usePosterStore((state) => state.setTheme);
   const setPage = usePosterStore((state) => state.setPage);
   const setDocumentFonts = usePosterStore((state) => state.setDocumentFonts);
+  const setDocTitle = usePosterStore((state) => state.setDocTitle);
   const undo = usePosterStore((state) => state.undo);
   const redo = usePosterStore((state) => state.redo);
 
@@ -66,6 +68,10 @@ export function Toolbar() {
         <button onClick={() => window.dispatchEvent(new CustomEvent("postera:fit-page"))}>{sq.toolbar.fit}</button>
       </div>
       <label className="theme-picker">
+        {sq.toolbar.title}
+        <input className="title-input" value={doc.title} onChange={(event) => setDocTitle(event.target.value)} />
+      </label>
+      <label className="theme-picker">
         {sq.toolbar.pageSize}
         <select value={doc.page.size} onChange={(event) => setPage({ size: event.target.value as PageSize })}>
           <option value="A4">A4</option>
@@ -102,7 +108,7 @@ export function Toolbar() {
         </select>
       </label>
       <div className="toolbar-spacer" />
-      <span className="save-state">{savedState === "saved" ? sq.toolbar.saved : sq.toolbar.saving}</span>
+      <span className={`save-state ${saveError ? "save-error" : ""}`}>{saveError ?? (savedState === "saved" ? sq.toolbar.saved : sq.toolbar.saving)}</span>
       <button className="icon-text" onClick={() => downloadPoster(doc)}>
         <Download size={20} />
         {sq.toolbar.saveFile}

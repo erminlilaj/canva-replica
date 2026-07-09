@@ -4,12 +4,11 @@ import { riskAssessmentTemplate } from "../templates/riskAssessment";
 import { extraTemplates } from "../templates/moreTemplates";
 import { usePosterStore } from "../core/store";
 import type { PosterDoc } from "../core/types";
+import { copyAsNewPoster } from "../core/document";
+import { deletePoster, loadPoster } from "../core/persistence";
 
-function freshCopy(doc: PosterDoc): PosterDoc {
-  return {
-    ...structuredClone(doc),
-    blocks: doc.blocks.map((block) => ({ ...structuredClone(block), id: crypto.randomUUID() })),
-  };
+function datedTitle(title: string) {
+  return `${title} — ${new Intl.DateTimeFormat("sq-AL", { day: "numeric", month: "short" }).format(new Date())}`;
 }
 
 const blankPoster: PosterDoc = {
@@ -22,7 +21,24 @@ const blankPoster: PosterDoc = {
 
 export function Gallery() {
   const openEditor = usePosterStore((state) => state.openEditor);
-  const autosavedDoc = usePosterStore((state) => state.autosavedDoc);
+  const posterIndex = usePosterStore((state) => state.posterIndex);
+  const setPosterIndex = usePosterStore((state) => state.setPosterIndex);
+  const recentPoster = posterIndex[0];
+
+  const openSavedPoster = async (id: string) => {
+    const poster = await loadPoster(id);
+    if (poster) {
+      openEditor(poster);
+      return;
+    }
+    window.alert(sq.file.invalid);
+  };
+
+  const removePoster = async (id: string) => {
+    if (!window.confirm(sq.gallery.confirmDeletePoster)) return;
+    setPosterIndex(await deletePoster(id));
+  };
+
   return (
     <main className="gallery">
       <section className="gallery-intro">
@@ -32,8 +48,19 @@ export function Gallery() {
           <p>{sq.gallery.subtitle}</p>
         </div>
       </section>
+      {recentPoster ? (
+        <section className="continue-section">
+          <button className="template-card continue-card" onClick={() => openSavedPoster(recentPoster.id)}>
+            <FolderOpen size={34} />
+            <span>
+              <strong>{sq.gallery.continue}</strong>
+              <small>{recentPoster.title}</small>
+            </span>
+          </button>
+        </section>
+      ) : null}
       <section className="template-grid" aria-label={sq.gallery.title}>
-        <button className="template-card featured" onClick={() => openEditor(freshCopy(riskAssessmentTemplate))}>
+        <button className="template-card featured" onClick={() => openEditor(copyAsNewPoster(riskAssessmentTemplate, datedTitle(riskAssessmentTemplate.title)))}>
           <LayoutTemplate size={34} />
           <span>
             <strong>{sq.gallery.startRisk}</strong>
@@ -42,7 +69,7 @@ export function Gallery() {
           <em>{sq.gallery.openTemplate}</em>
         </button>
         {extraTemplates.map((template) => (
-          <button className="template-card" key={template.title} onClick={() => openEditor(freshCopy(template))}>
+          <button className="template-card" key={template.title} onClick={() => openEditor(copyAsNewPoster(template, datedTitle(template.title)))}>
             <LayoutTemplate size={34} />
             <span>
               <strong>{template.title}</strong>
@@ -50,26 +77,30 @@ export function Gallery() {
             </span>
           </button>
         ))}
-        <button className="template-card" onClick={() => openEditor(freshCopy(blankPoster))}>
+        <button className="template-card" onClick={() => openEditor(copyAsNewPoster(blankPoster, datedTitle(blankPoster.title)))}>
           <FilePlus2 size={34} />
           <span>
             <strong>{sq.gallery.blank}</strong>
             <small>{sq.gallery.blankDesc}</small>
           </span>
         </button>
-        <button
-          className="template-card muted"
-          disabled={!autosavedDoc}
-          onClick={() => {
-            if (autosavedDoc) openEditor(autosavedDoc);
-          }}
-        >
-          <FolderOpen size={34} />
-          <span>
-            <strong>{sq.gallery.myPosters}</strong>
-            <small>{autosavedDoc ? sq.gallery.continue : sq.gallery.noSavedPoster}</small>
-          </span>
-        </button>
+      </section>
+      <section className="saved-posters">
+        <h2>{sq.gallery.myPosters}</h2>
+        {posterIndex.length === 0 ? <p>{sq.gallery.noSavedPoster}</p> : null}
+        <div className="saved-list">
+          {posterIndex.map((poster) => (
+            <div className="saved-row" key={poster.id}>
+              <button onClick={() => openSavedPoster(poster.id)}>
+                <strong>{poster.title}</strong>
+                <small>{sq.gallery.modified}: {new Intl.DateTimeFormat("sq-AL", { dateStyle: "medium", timeStyle: "short" }).format(new Date(poster.updatedAt))}</small>
+              </button>
+              <button className="saved-delete" onClick={() => removePoster(poster.id)}>
+                {sq.inspector.delete}
+              </button>
+            </div>
+          ))}
+        </div>
       </section>
     </main>
   );

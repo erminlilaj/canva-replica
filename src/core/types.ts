@@ -16,7 +16,9 @@ export type BlockType =
 
 export interface PosterDoc {
   version: 1;
+  id?: string;
   title: string;
+  updatedAt?: number;
   page: { size: PageSize; orientation: PageOrientation };
   theme: ThemeId;
   fonts?: { heading?: string; body?: string };
