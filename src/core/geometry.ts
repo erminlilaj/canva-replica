@@ -43,10 +43,13 @@ export function firstFreeFrame(index: number, page: { w: number; h: number }): F
   const colW = Math.min(92, page.w - margin * 2);
   const row = Math.floor(index / 3);
   const col = index % 3;
-  return {
-    x: margin + col * (colW + 5),
-    y: margin + row * 32,
-    w: colW,
-    h: "auto",
-  };
+  return clampFrame(
+    {
+      x: margin + col * (colW + 5),
+      y: margin + row * 32,
+      w: colW,
+      h: "auto",
+    },
+    page,
+  );
 }

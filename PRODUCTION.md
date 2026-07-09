@@ -98,10 +98,10 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] Loading state: gallery reads IndexedDB async — show a skeleton, not a flash of "no posters."
 
 ### 11. Test floor (keep it small but real)
-- [ ] `validate.ts` tests (item 3).
-- [ ] `clampFrame` with numeric h + `firstFreeFrame` never places outside page (item 5).
-- [ ] Store logic tests (plain function calls on the zustand store, no DOM): drag commit produces exactly one history entry; undo after row-delete restores the row; `duplicateBlock` deep-copies (mutating the copy's data must not touch the original).
-- [ ] One smoke test with `@testing-library/react`: app renders gallery, clicking the risk template opens the editor. (Only new dev-dep allowed for this checklist: `@testing-library/react` + `jsdom`.)
+- [x] `validate.ts` tests (item 3).
+- [x] `clampFrame` with numeric h + `firstFreeFrame` never places outside page (item 5).
+- [x] Store logic tests (plain function calls on the zustand store, no DOM): drag commit produces exactly one history entry; undo after row-delete restores the row; `duplicateBlock` deep-copies (mutating the copy's data must not touch the original).
+- [x] One smoke test with `@testing-library/react`: app renders gallery, clicking the risk template opens the editor. (Only new dev-dep allowed for this checklist: `@testing-library/react` + `jsdom`.)
 
 ---
 

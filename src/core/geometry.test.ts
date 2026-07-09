@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "./geometry";
+import { clampFrame, firstFreeFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "./geometry";
 
 describe("geometry", () => {
   it("clamps numeric heights to a 10mm minimum and inside the page", () => {
@@ -23,6 +23,17 @@ describe("geometry", () => {
   it("snaps values to the 4mm grid by default", () => {
     expect(snapMm(6)).toBe(8);
     expect(snapMm(9)).toBe(8);
+  });
+
+  it("keeps firstFreeFrame inside the page even after many blocks", () => {
+    const page = { w: 210, h: 297 };
+    for (let index = 0; index < 60; index += 1) {
+      const frame = firstFreeFrame(index, page);
+      expect(frame.x).toBeGreaterThanOrEqual(4);
+      expect(frame.x + frame.w).toBeLessThanOrEqual(page.w - 4 + 0.001);
+      expect(frame.y).toBeGreaterThanOrEqual(4);
+      expect(frame.y).toBeLessThanOrEqual(page.h - 4 + 0.001);
+    }
   });
 
   it("swaps page dimensions for landscape orientation", () => {
