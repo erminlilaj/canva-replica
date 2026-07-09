@@ -28,7 +28,7 @@ const blocks: Block[] = [
     type: "text",
     frame: { x: 9, y: 16, w: 82, h: "auto" },
     style: { size: "subtitle", align: "center" },
-    data: { text: "DREJTORIA RAJONALE E ARSIMIT PARAUNIVERSITAR FIER\nSHKOLLA 9 VJEÇARE “S SHKURTI” BALLSH, MALLAKASTËR" },
+    data: { text: "DREJTORIA RAJONALE E ARSIMIT PARAUNIVERSITAR\nSHKOLLA 9 VJEÇARE “EMRI I SHKOLLËS”" },
   },
   {
     id: "cover-main",
@@ -43,7 +43,7 @@ const blocks: Block[] = [
     type: "text",
     frame: { x: 54, y: 151, w: 38, h: "auto" },
     style: { size: "body", align: "center" },
-    data: { text: "DREJTORI I SHKOLLËS\nKLODIAN SHEHAJ" },
+    data: { text: "DREJTORI I SHKOLLËS\nEMRI MBIEMRI" },
   },
   {
     id: "contents",
@@ -72,11 +72,11 @@ const blocks: Block[] = [
     data: {
       title: "Grupi i punës",
       members: [
-        { role: "drejtor", name: "Klodian Shehaj" },
-        { role: "psikologe", name: "Matilda Heqimaj" },
-        { role: "administrator", name: "Ismij Alket Malasi" },
-        { role: "drejtues TIK", name: "Edvin Xhaferi" },
-        { role: "drejtuese njësie", name: "Blerina Hoxha" },
+        { role: "drejtor", name: "Emri Mbiemri" },
+        { role: "psikologe", name: "Emri Mbiemri" },
+        { role: "administrator", name: "Emri Mbiemri" },
+        { role: "drejtues TIK", name: "Emri Mbiemri" },
+        { role: "drejtuese njësie", name: "Emri Mbiemri" },
       ],
     },
   },
