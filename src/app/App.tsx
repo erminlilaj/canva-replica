@@ -5,6 +5,7 @@ import { PrintView } from "../editor/PrintView";
 import { loadPosterIndex, migrateLegacyAutosave, savePoster } from "../core/persistence";
 import { usePosterStore } from "../core/store";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { sq } from "../i18n/sq";
 
 export default function App() {
   const view = usePosterStore((state) => state.view);
@@ -25,7 +26,7 @@ export default function App() {
       })
       .catch((error: unknown) => {
         console.error(error);
-        setSaveError("Nuk u lexuan posterat e ruajtur.");
+        setSaveError(sq.storage.indexLoadFailed);
       });
   }, [setPosterIndex, setSaveError]);
 
@@ -43,7 +44,7 @@ export default function App() {
         .catch((error: unknown) => {
           console.error(error);
           if (!cancelled) {
-            setSaveError("Nuk u ruajt dot. Shkarko skedarin për siguri.");
+            setSaveError(sq.storage.saveFailed);
           }
         });
     }, 350);

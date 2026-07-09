@@ -51,7 +51,7 @@ export function Inspector() {
   const addColumn = () => {
     if (block.type !== "table") return;
     updateBlockData<TableBlock>(block.id, {
-      columns: [...block.data.columns, `Kolona ${block.data.columns.length + 1}`],
+      columns: [...block.data.columns, sq.inspector.newColumnName(block.data.columns.length + 1)],
       rows: block.data.rows.map((row) => [...row, ""]),
     });
   };
@@ -155,12 +155,12 @@ export function Inspector() {
       ) : null}
       {block.type === "checklist" ? (
         <div className="inspector-actions">
-          <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: [...block.data.items, "Pikë e re"] })}>{sq.inspector.addItem}</button>
+          <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: [...block.data.items, sq.inspector.newChecklistItem] })}>{sq.inspector.addItem}</button>
         </div>
       ) : null}
       {block.type === "team" ? (
         <div className="inspector-actions">
-          <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: [...block.data.members, { role: "rol", name: "Emri Mbiemri" }] })}>
+          <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: [...block.data.members, { role: sq.inspector.newMemberRole, name: sq.inspector.newMemberName }] })}>
             {sq.inspector.addMember}
           </button>
         </div>
@@ -172,7 +172,7 @@ export function Inspector() {
               key={index}
               onClick={() => {
                 const columns = block.data.columns.map((entry, columnIndex) =>
-                  columnIndex === index ? { ...entry, items: [...entry.items, "Pikë e re"] } : entry,
+                  columnIndex === index ? { ...entry, items: [...entry.items, sq.inspector.newChecklistItem] } : entry,
                 );
                 updateBlockData<SwotGridBlock>(block.id, { columns });
               }}

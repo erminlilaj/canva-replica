@@ -1,10 +1,10 @@
 import { ArrowLeft, Download, FileDown, FolderOpen, Minus, Plus, Printer, Redo2, Undo2 } from "lucide-react";
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, FocusEvent, useRef, useState } from "react";
 import { themes } from "../core/themes";
 import { downloadPoster, readPosterFile } from "../core/persistence";
 import { usePosterStore } from "../core/store";
 import { sq } from "../i18n/sq";
-import type { PageOrientation, PageSize, ThemeId } from "../core/types";
+import type { PageOrientation, PageSize, PosterDoc, ThemeId } from "../core/types";
 
 const fontOptions = ["Inter, sans-serif", "Source Sans 3, sans-serif", "Merriweather, serif"];
 
@@ -22,8 +22,24 @@ export function Toolbar() {
   const setPage = usePosterStore((state) => state.setPage);
   const setDocumentFonts = usePosterStore((state) => state.setDocumentFonts);
   const setDocTitle = usePosterStore((state) => state.setDocTitle);
+  const setDoc = usePosterStore((state) => state.setDoc);
   const undo = usePosterStore((state) => state.undo);
   const redo = usePosterStore((state) => state.redo);
+  const [titleFocusBase, setTitleFocusBase] = useState<PosterDoc>();
+
+  const handleTitleFocus = (event: FocusEvent<HTMLInputElement>) => {
+    setTitleFocusBase(doc);
+    event.target.select();
+  };
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDoc({ ...doc, title: event.target.value }, false);
+  };
+  const handleTitleBlur = () => {
+    if (titleFocusBase && titleFocusBase.title !== doc.title) {
+      setDocTitle(doc.title, titleFocusBase);
+    }
+    setTitleFocusBase(undefined);
+  };
 
   const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -69,14 +85,21 @@ export function Toolbar() {
       </div>
       <label className="theme-picker">
         {sq.toolbar.title}
-        <input className="title-input" value={doc.title} onChange={(event) => setDocTitle(event.target.value)} />
+        <input
+          className="title-input"
+          value={doc.title}
+          onFocus={handleTitleFocus}
+          onChange={handleTitleChange}
+          onBlur={handleTitleBlur}
+        />
       </label>
       <label className="theme-picker">
         {sq.toolbar.pageSize}
+        {/* ISO paper size codes below are identical in every language */}
         <select value={doc.page.size} onChange={(event) => setPage({ size: event.target.value as PageSize })}>
-          <option value="A4">A4</option>
-          <option value="A3">A3</option>
-          <option value="A2">A2</option>
+          <option value="A4">A4</option> {/* i18n-ignore */}
+          <option value="A3">A3</option> {/* i18n-ignore */}
+          <option value="A2">A2</option> {/* i18n-ignore */}
         </select>
       </label>
       <label className="theme-picker">

@@ -25,7 +25,7 @@ interface PosterState {
   setPosterIndex: (index: PosterSummary[]) => void;
   setSaveError: (message?: string) => void;
   setSavedState: (state: "saved" | "saving") => void;
-  setDocTitle: (title: string) => void;
+  setDocTitle: (title: string, historyBase?: PosterDoc) => void;
   selectBlock: (id?: string) => void;
   setPage: (page: { size?: PageSize; orientation?: PageOrientation }) => void;
   setDocumentFonts: (fonts: { heading?: string; body?: string }) => void;
@@ -78,7 +78,7 @@ export const usePosterStore = create<PosterState>((set, get) => ({
   setPosterIndex: (posterIndex) => set({ posterIndex }),
   setSaveError: (saveError) => set({ saveError }),
   setSavedState: (savedState) => set({ savedState }),
-  setDocTitle: (title) => set((state) => withHistory(state, { ...state.doc, title })),
+  setDocTitle: (title, historyBase) => set((state) => withHistory(state, { ...state.doc, title }, historyBase)),
   selectBlock: (selectedId) => set({ selectedId }),
   setPage: (page) =>
     set((state) =>

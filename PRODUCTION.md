@@ -84,8 +84,8 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 ## P2 — Production hygiene
 
 ### 8. i18n stragglers
-- [ ] Move to `sq.ts`: `"Pikë e re"` (Inspector ×2), `{ role: "rol", name: "Emri Mbiemri" }`, `` `Kolona ${n}` ``, and any defaults inside `defaultBlocks.ts` that aren't already there.
-- [ ] Add a guard: `npm run check:i18n` script that greps `src/editor src/blocks` for `"[A-ZÇË][a-zçë]` string literals in JSX and fails CI on new offenders (crude is fine).
+- [x] Move to `sq.ts`: `"Pikë e re"` (Inspector ×2), `{ role: "rol", name: "Emri Mbiemri" }`, `` `Kolona ${n}` ``, and any defaults inside `defaultBlocks.ts` that aren't already there.
+- [x] Add a guard: `npm run check:i18n` script that greps `src/editor src/blocks` for `"[A-ZÇË][a-zçë]` string literals in JSX and fails CI on new offenders (crude is fine).
 
 ### 9. CI + deploy
 - [ ] `.github/workflows/ci.yml`: on push/PR → `npm ci`, `npm run build`, `npm test`. Node 20.
