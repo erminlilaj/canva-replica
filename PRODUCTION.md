@@ -88,9 +88,9 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] Add a guard: `npm run check:i18n` script that greps `src/editor src/blocks` for `"[A-ZÇË][a-zçë]` string literals in JSX and fails CI on new offenders (crude is fine).
 
 ### 9. CI + deploy
-- [ ] `.github/workflows/ci.yml`: on push/PR → `npm ci`, `npm run build`, `npm test`. Node 20.
-- [ ] Decide hosting. Vercel/Netlify: zero config. GitHub Pages: set `base: "/canva-replica/"` in `vite.config.ts` and add a `deploy` workflow (or use `gh-pages` branch). Document the choice in README with exact steps.
-- [ ] README: add "Si ta publikosh" section + English one-paragraph summary at top for repo visitors.
+- [x] `.github/workflows/ci.yml`: on push/PR → `npm ci`, `npm run build`, `npm test`. Node 20.
+- [x] Decide hosting: **Vercel** (zero config for Vite; `dist` output, no `base` change needed).
+- [x] README: add "Si ta publikosh" section + English one-paragraph summary at top for repo visitors.
 
 ### 10. App shell polish
 - [ ] Favicon + `<meta name="description">` (Albanian) + `theme-color` in `index.html`.
