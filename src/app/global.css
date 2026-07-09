@@ -832,6 +832,17 @@ input:focus-visible,
   margin-top: 12px;
 }
 
+.inspector-warning {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #f0cf9b;
+  border-radius: 8px;
+  background: #fff7e6;
+  color: #8a5b12;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
 .inspector-actions .danger {
   border-color: #efb4bc;
   background: #fff1f2;
@@ -898,8 +909,16 @@ input:focus-visible,
     background: #ffffff;
   }
 
-  .print-hint {
-    display: none;
+  .print-hint,
+  .grab-handle,
+  .resize-handle,
+  .inline-remove {
+    display: none !important;
+  }
+
+  .poster-block.selected {
+    border-color: transparent;
+    box-shadow: none;
   }
 
   .poster-page {

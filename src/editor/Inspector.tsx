@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Copy, Trash2, Upload } from "lucide-react";
 import { sq } from "../i18n/sq";
 import { themes } from "../core/themes";
@@ -18,6 +18,18 @@ export function Inspector() {
   const moveSelectedBlockLayer = usePosterStore((state) => state.moveSelectedBlockLayer);
   const block = doc.blocks.find((item) => item.id === selectedId);
   const theme = themes[doc.theme];
+  const imageSrc = block?.type === "image" ? block.data.src : undefined;
+  const [lowResPhoto, setLowResPhoto] = useState(false);
+
+  useEffect(() => {
+    if (!imageSrc) {
+      setLowResPhoto(false);
+      return;
+    }
+    const probe = new window.Image();
+    probe.onload = () => setLowResPhoto(Math.max(probe.naturalWidth, probe.naturalHeight) < 1000);
+    probe.src = imageSrc;
+  }, [imageSrc]);
 
   if (!block) {
     return (
@@ -186,6 +198,7 @@ export function Inspector() {
             <option value="contain">{sq.inspector.fitContain}</option>
           </select>
           <input ref={imageInputRef} className="hidden-input" type="file" accept="image/*" onChange={handleImageFile} />
+          {lowResPhoto ? <p className="inspector-warning">{sq.inspector.lowResPhoto}</p> : null}
         </div>
       ) : null}
       <div className="inspector-actions">

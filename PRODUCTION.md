@@ -66,9 +66,9 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 
 - [x] **Delete the static `@page { size: A3 portrait }` rule at `global.css:764–767`.** It conflicts with the dynamic `@page` injected by `PrintView.tsx`; cascade order currently decides the page size for A4/landscape docs. The injected rule must be the only `@page` in the app.
 - [x] Point all four themes' `headingFont`/`bodyFont` in `themes.ts` at the **bundled** families (Inter / Source Sans 3 / Merriweather with generic fallbacks) instead of Arial/Georgia/Trebuchet/Verdana. Self-hosted fonts exist precisely so output is identical on every machine; system-font defaults defeat that.
-- [ ] Verify `.print-hint`, block selection outlines, and grab/resize/✕ handles are all `display:none` under `@media print`.
-- [ ] Images: warn (small toast/inspector note) when an uploaded image is < ~1000 px on its long edge — it will print blurry at A3.
-- [ ] **Manual test matrix (do this, record results in this file):** Chrome + Firefox × A4-portrait, A3-portrait, A4-landscape (certificate template) → page size correct, no scaling/cropping, pastel fills present, fonts identical. Windows + one other OS if available.
+- [x] Verify `.print-hint`, block selection outlines, and grab/resize/✕ handles are all `display:none` under `@media print`.
+- [x] Images: warn (small toast/inspector note) when an uploaded image is < ~1000 px on its long edge — it will print blurry at A3.
+- [ ] **Manual test matrix (do this, record results in this file):** Chrome + Firefox × A4-portrait, A3-portrait, A4-landscape (certificate template) → page size correct, no scaling/cropping, pastel fills present, fonts identical. Windows + one other OS if available. *(Requires a human at the print dialog — pending.)*
   - [ ] Chrome results: __
   - [ ] Firefox results: __
 
