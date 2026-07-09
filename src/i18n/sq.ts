@@ -62,7 +62,7 @@ export const sq = {
     align: "Rreshtimi",
     duplicate: "Dubliko",
     delete: "Fshi",
-    confirmDelete: "A je i sigurt që do ta fshish këtë bllok?",
+    confirmDelete: "A je i sigurt që do ta fshish këtë bllok? Mund ta kthesh me Zhbëj.",
     addRow: "Shto rresht",
     addColumn: "Shto kolonë",
     removeRow: "Fshi rreshtin",

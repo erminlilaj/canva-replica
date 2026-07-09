@@ -1,6 +1,6 @@
 import { PointerEvent, WheelEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BlockRenderer } from "../blocks/registry";
-import { clampFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "../core/geometry";
+import { PX_PER_MM, clampFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "../core/geometry";
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
 import type { Block, Frame, PosterDoc } from "../core/types";
@@ -16,6 +16,26 @@ interface DragState {
   frame: Frame;
   historyBase: PosterDoc;
   latestFrame: Frame;
+  heightMm: number;
+  edges: { v: number[]; h: number[] };
+}
+
+interface Guides {
+  v: number[];
+  h: number[];
+}
+
+const GUIDE_THRESHOLD_MM = 2;
+
+function snapToEdges(start: number, span: number, edges: number[]) {
+  for (const offset of [0, span / 2, span]) {
+    for (const edge of edges) {
+      if (Math.abs(start + offset - edge) <= GUIDE_THRESHOLD_MM) {
+        return { value: edge - offset, guide: edge };
+      }
+    }
+  }
+  return undefined;
 }
 
 interface PanState {
@@ -41,6 +61,7 @@ function sameFrame(a: Frame, b: Frame) {
 
 export function Canvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   const spacePressed = useRef(false);
   const doc = usePosterStore((state) => state.doc);
   const selectedId = usePosterStore((state) => state.selectedId);
@@ -54,6 +75,7 @@ export function Canvas() {
   const nudgeSelectedBlock = usePosterStore((state) => state.nudgeSelectedBlock);
   const [drag, setDrag] = useState<DragState>();
   const [pan, setPan] = useState<PanState>();
+  const [guides, setGuides] = useState<Guides>({ v: [], h: [] });
   const page = useMemo(() => pageSizeMm(doc.page.size, doc.page.orientation), [doc.page.orientation, doc.page.size]);
   const theme = themes[doc.theme];
 
@@ -130,6 +152,19 @@ export function Canvas() {
     event.preventDefault();
     event.stopPropagation();
     selectBlock(block.id);
+    const measuredHeights = new Map<string, number>();
+    pageRef.current?.querySelectorAll<HTMLElement>("[data-block-id]").forEach((element) => {
+      if (element.dataset.blockId) measuredHeights.set(element.dataset.blockId, element.offsetHeight / PX_PER_MM);
+    });
+    const blockHeightMm = (item: Block) =>
+      typeof item.frame.h === "number" ? item.frame.h : measuredHeights.get(item.id) ?? 20;
+    const edges: DragState["edges"] = { v: [0, page.w / 2, page.w], h: [0, page.h / 2, page.h] };
+    for (const other of doc.blocks) {
+      if (other.id === block.id) continue;
+      const otherH = blockHeightMm(other);
+      edges.v.push(other.frame.x, other.frame.x + other.frame.w / 2, other.frame.x + other.frame.w);
+      edges.h.push(other.frame.y, other.frame.y + otherH / 2, other.frame.y + otherH);
+    }
     setDrag({
       id: block.id,
       mode,
@@ -138,18 +173,25 @@ export function Canvas() {
       frame: block.frame,
       historyBase: doc,
       latestFrame: block.frame,
+      heightMm: blockHeightMm(block),
+      edges,
     });
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const moveDrag = (event: PointerEvent) => {
     if (!drag) return;
-    const dx = snapMm(pxToMm((event.clientX - drag.startX) / zoom));
-    const dy = snapMm(pxToMm((event.clientY - drag.startY) / zoom));
     let nextFrame: Frame;
     if (drag.mode === "move") {
-      nextFrame = { ...drag.frame, x: snapMm(drag.frame.x + dx), y: snapMm(drag.frame.y + dy) };
+      const rawX = drag.frame.x + pxToMm((event.clientX - drag.startX) / zoom);
+      const rawY = drag.frame.y + pxToMm((event.clientY - drag.startY) / zoom);
+      const snapX = snapToEdges(rawX, drag.frame.w, drag.edges.v);
+      const snapY = snapToEdges(rawY, drag.heightMm, drag.edges.h);
+      nextFrame = { ...drag.frame, x: snapX?.value ?? snapMm(rawX), y: snapY?.value ?? snapMm(rawY) };
+      setGuides({ v: snapX ? [snapX.guide] : [], h: snapY ? [snapY.guide] : [] });
     } else {
+      const dx = snapMm(pxToMm((event.clientX - drag.startX) / zoom));
+      const dy = snapMm(pxToMm((event.clientY - drag.startY) / zoom));
       const w = drag.mode === "resize-s" ? drag.frame.w : Math.max(28, snapMm(drag.frame.w + dx));
       const h =
         typeof drag.frame.h === "number" && drag.mode !== "resize-e"
@@ -168,12 +210,25 @@ export function Canvas() {
       updateBlock(drag.id, { frame: drag.latestFrame }, { historyBase: drag.historyBase });
     }
     setDrag(undefined);
+    setGuides({ v: [], h: [] });
   };
 
   const handleWheel = (event: WheelEvent<HTMLElement>) => {
     if (!event.ctrlKey) return;
     event.preventDefault();
-    setZoom(zoom + (event.deltaY < 0 ? 0.08 : -0.08));
+    const nextZoom = Math.max(0.25, Math.min(4, zoom + (event.deltaY < 0 ? 0.08 : -0.08)));
+    const stage = canvasRef.current;
+    const wrap = pageRef.current?.parentElement;
+    setZoom(nextZoom);
+    if (!stage || !wrap || nextZoom === zoom) return;
+    const rect = wrap.getBoundingClientRect();
+    const pointX = event.clientX - rect.left;
+    const pointY = event.clientY - rect.top;
+    const ratio = nextZoom / zoom;
+    requestAnimationFrame(() => {
+      stage.scrollLeft += pointX * (ratio - 1);
+      stage.scrollTop += pointY * (ratio - 1);
+    });
   };
 
   const startPan = (event: PointerEvent<HTMLElement>) => {
@@ -213,6 +268,7 @@ export function Canvas() {
       >
         <div
           className="poster-page"
+          ref={pageRef}
           aria-label={sq.canvas.page}
           onPointerDown={() => selectBlock(undefined)}
           style={{
@@ -227,6 +283,7 @@ export function Canvas() {
           {doc.blocks.map((block) => (
             <div
               key={block.id}
+              data-block-id={block.id}
               className={`poster-block ${selectedId === block.id ? "selected" : ""}`}
               style={frameStyle(block.frame)}
               onPointerDown={(event) => {
@@ -276,6 +333,12 @@ export function Canvas() {
                 </>
               ) : null}
             </div>
+          ))}
+          {guides.v.map((mm) => (
+            <div key={`v-${mm}`} className="align-guide align-guide-v" style={{ left: `${mmToPx(mm)}px` }} />
+          ))}
+          {guides.h.map((mm) => (
+            <div key={`h-${mm}`} className="align-guide align-guide-h" style={{ top: `${mmToPx(mm)}px` }} />
           ))}
         </div>
       </div>

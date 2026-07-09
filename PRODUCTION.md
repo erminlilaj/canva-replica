@@ -74,10 +74,10 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 
 ### 7. Full-canvas usability details
 
-- [ ] Zoom toward cursor: `handleWheel` currently zooms around center; adjust `scrollLeft/Top` so the point under the cursor stays fixed.
-- [ ] Alignment guides: while dragging, snap to other blocks' left/center/right and top/middle/bottom edges within a 2 mm threshold, drawing a 1 px guide line. Grid snap (4 mm) stays as fallback. Pure render-time computation — no state model changes.
-- [ ] `softColor()` in `registry.tsx` ignores `style.accent`: a custom-colored block keeps its old themed pastel background. Derive a soft tint from the accent (e.g. accent at ~12% opacity over white) so custom colors look coherent.
-- [ ] Delete key currently `window.confirm`s every time; keep confirm for Delete-key and inspector both, but make Undo the real safety net and say so in the confirm text ("Mund ta kthesh me Zhbëj").
+- [x] Zoom toward cursor: `handleWheel` currently zooms around center; adjust `scrollLeft/Top` so the point under the cursor stays fixed.
+- [x] Alignment guides: while dragging, snap to other blocks' left/center/right and top/middle/bottom edges within a 2 mm threshold, drawing a 1 px guide line. Grid snap (4 mm) stays as fallback. Pure render-time computation — no state model changes.
+- [x] `softColor()` in `registry.tsx` ignores `style.accent`: a custom-colored block keeps its old themed pastel background. Derive a soft tint from the accent (e.g. accent at ~12% opacity over white) so custom colors look coherent.
+- [x] Delete key currently `window.confirm`s every time; keep confirm for Delete-key and inspector both, but make Undo the real safety net and say so in the confirm text ("Mund ta kthesh me Zhbëj").
 
 ---
 

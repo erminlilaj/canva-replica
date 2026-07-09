@@ -450,6 +450,25 @@ input:focus-visible,
   display: block;
 }
 
+.align-guide {
+  position: absolute;
+  z-index: 6;
+  background: #d6338f;
+  pointer-events: none;
+}
+
+.align-guide-v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.align-guide-h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
 .text-block {
   width: 100%;
   white-space: pre-line;

@@ -102,6 +102,7 @@ function slotColor(block: Block, fallback = 0) {
 }
 
 function softColor(block: Block, fallback = 0) {
+  if (block.style?.accent) return `color-mix(in srgb, ${block.style.accent} 14%, white)`;
   const theme = themes[usePosterStore.getState().doc.theme];
   return theme.softSlots[block.style?.colorSlot ?? fallback];
 }
