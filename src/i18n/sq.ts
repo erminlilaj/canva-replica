@@ -13,6 +13,8 @@ export const sq = {
     modified: "Modifikuar më",
     confirmDeletePoster: "A je i sigurt që do ta fshish këtë poster të ruajtur?",
     openTemplate: "Hap shabllonin",
+    duplicate: "Dyfisho",
+    duplicateTitle: (title: string) => `${title} (kopje)`,
   },
   toolbar: {
     back: "Kthehu",

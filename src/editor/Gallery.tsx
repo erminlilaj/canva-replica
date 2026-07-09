@@ -5,7 +5,7 @@ import { extraTemplates } from "../templates/moreTemplates";
 import { usePosterStore } from "../core/store";
 import type { PosterDoc } from "../core/types";
 import { copyAsNewPoster } from "../core/document";
-import { deletePoster, loadPoster } from "../core/persistence";
+import { deletePoster, loadPoster, savePoster } from "../core/persistence";
 
 function datedTitle(title: string) {
   return `${title} — ${new Intl.DateTimeFormat("sq-AL", { day: "numeric", month: "short" }).format(new Date())}`;
@@ -38,6 +38,16 @@ export function Gallery() {
   const removePoster = async (id: string) => {
     if (!window.confirm(sq.gallery.confirmDeletePoster)) return;
     setPosterIndex(await deletePoster(id));
+  };
+
+  const duplicatePoster = async (id: string) => {
+    const poster = await loadPoster(id);
+    if (!poster) {
+      window.alert(sq.file.invalid);
+      return;
+    }
+    const { index } = await savePoster(copyAsNewPoster(poster, sq.gallery.duplicateTitle(poster.title)));
+    setPosterIndex(index);
   };
 
   return (
@@ -103,6 +113,7 @@ export function Gallery() {
                 <strong>{poster.title}</strong>
                 <small>{sq.gallery.modified}: {new Intl.DateTimeFormat("sq-AL", { dateStyle: "medium", timeStyle: "short" }).format(new Date(poster.updatedAt))}</small>
               </button>
+              <button onClick={() => duplicatePoster(poster.id)}>{sq.gallery.duplicate}</button>
               <button className="saved-delete" onClick={() => removePoster(poster.id)}>
                 {sq.inspector.delete}
               </button>

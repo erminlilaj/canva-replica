@@ -112,7 +112,7 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] Drag-from-palette in addition to click-to-add (drop at pointer position). Only reintroduce dnd-kit if built; otherwise reuse the existing pointer-drag machinery. *(Custom pointer tracking, no dnd-kit; verify live in the final end-to-end pass.)*
 - [x] Multi-select (shift-click) + group move. *(Store field renamed `selectedId` → `selectedIds: string[]`; Inspector shows shared duplicate/delete actions when >1 selected, falls back to the normal single-block panel otherwise. Resize handles and layer reorder still act on one block at a time.)*
 - [x] Lock block toggle.
-- [ ] "Dyfisho posterin" (duplicate whole poster) in gallery.
+- [x] "Dyfisho posterin" (duplicate whole poster) in gallery.
 - [ ] First-launch coach marks (max 3 tooltips: palette → canvas → export).
 
 ---
