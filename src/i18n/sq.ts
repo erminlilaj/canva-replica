@@ -9,6 +9,7 @@ export const sq = {
     blank: "Poster bosh",
     blankDesc: "Fillo me një faqe A3 të pastër.",
     continue: "Vazhdo ku e le",
+    noSavedPoster: "Nuk ka ende poster të ruajtur.",
     openTemplate: "Hap shabllonin",
   },
   toolbar: {

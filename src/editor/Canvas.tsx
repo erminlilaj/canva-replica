@@ -3,7 +3,7 @@ import { BlockRenderer } from "../blocks/registry";
 import { clampFrame, mmToPx, pageSizeMm, pxToMm, snapMm } from "../core/geometry";
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
-import type { Block, Frame } from "../core/types";
+import type { Block, Frame, PosterDoc } from "../core/types";
 import { sq } from "../i18n/sq";
 
 type DragMode = "move" | "resize";
@@ -14,6 +14,8 @@ interface DragState {
   startX: number;
   startY: number;
   frame: Frame;
+  historyBase: PosterDoc;
+  latestFrame: Frame;
 }
 
 function frameStyle(frame: Frame) {
@@ -24,6 +26,10 @@ function frameStyle(frame: Frame) {
     minHeight: typeof frame.h === "number" ? `${mmToPx(frame.h)}px` : undefined,
     height: typeof frame.h === "number" ? `${mmToPx(frame.h)}px` : undefined,
   };
+}
+
+function sameFrame(a: Frame, b: Frame) {
+  return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
 }
 
 export function Canvas() {
@@ -41,7 +47,15 @@ export function Canvas() {
     event.preventDefault();
     event.stopPropagation();
     selectBlock(block.id);
-    setDrag({ id: block.id, mode, startX: event.clientX, startY: event.clientY, frame: block.frame });
+    setDrag({
+      id: block.id,
+      mode,
+      startX: event.clientX,
+      startY: event.clientY,
+      frame: block.frame,
+      historyBase: doc,
+      latestFrame: block.frame,
+    });
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -53,10 +67,18 @@ export function Canvas() {
       drag.mode === "resize"
         ? { ...drag.frame, w: Math.max(28, snapMm(drag.frame.w + dx)), h: drag.frame.h }
         : { ...drag.frame, x: snapMm(drag.frame.x + dx), y: snapMm(drag.frame.y + dy) };
-    updateBlock(drag.id, { frame: clampFrame(nextFrame, page) });
+    const frame = clampFrame(nextFrame, page);
+    setDrag((current) => (current ? { ...current, latestFrame: frame } : current));
+    updateBlock(drag.id, { frame }, { commit: false });
   };
 
-  const endDrag = () => setDrag(undefined);
+  const endDrag = () => {
+    if (!drag) return;
+    if (!sameFrame(drag.frame, drag.latestFrame)) {
+      updateBlock(drag.id, { frame: drag.latestFrame }, { historyBase: drag.historyBase });
+    }
+    setDrag(undefined);
+  };
 
   return (
     <main className="canvas-stage" ref={canvasRef}>
@@ -89,15 +111,15 @@ export function Canvas() {
                 event.stopPropagation();
                 selectBlock(block.id);
               }}
-              onPointerMove={moveDrag}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
             >
               <button
                 className="grab-handle"
                 aria-label={sq.canvas.move}
                 title={sq.canvas.move}
                 onPointerDown={(event) => startDrag(event, block, "move")}
+                onPointerMove={moveDrag}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
               />
               <BlockRenderer block={block} />
               <button
@@ -105,6 +127,9 @@ export function Canvas() {
                 aria-label={sq.canvas.resize}
                 title={sq.canvas.resize}
                 onPointerDown={(event) => startDrag(event, block, "resize")}
+                onPointerMove={moveDrag}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
               />
             </div>
           ))}

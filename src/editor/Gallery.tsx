@@ -21,6 +21,7 @@ const blankPoster: PosterDoc = {
 
 export function Gallery() {
   const openEditor = usePosterStore((state) => state.openEditor);
+  const autosavedDoc = usePosterStore((state) => state.autosavedDoc);
   return (
     <main className="gallery">
       <section className="gallery-intro">
@@ -46,11 +47,17 @@ export function Gallery() {
             <small>{sq.gallery.blankDesc}</small>
           </span>
         </button>
-        <button className="template-card muted" onClick={() => openEditor(freshCopy(riskAssessmentTemplate))}>
+        <button
+          className="template-card muted"
+          disabled={!autosavedDoc}
+          onClick={() => {
+            if (autosavedDoc) openEditor(autosavedDoc);
+          }}
+        >
           <FolderOpen size={34} />
           <span>
             <strong>{sq.gallery.myPosters}</strong>
-            <small>{sq.gallery.continue}</small>
+            <small>{autosavedDoc ? sq.gallery.continue : sq.gallery.noSavedPoster}</small>
           </span>
         </button>
       </section>

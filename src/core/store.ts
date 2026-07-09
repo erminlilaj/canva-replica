@@ -8,6 +8,7 @@ type View = "gallery" | "editor" | "print";
 
 interface PosterState {
   doc: PosterDoc;
+  autosavedDoc?: PosterDoc;
   selectedId?: string;
   view: View;
   zoom: number;
@@ -18,11 +19,16 @@ interface PosterState {
   openEditor: (doc: PosterDoc) => void;
   openPrint: () => void;
   setDoc: (doc: PosterDoc, commit?: boolean) => void;
+  setAutosavedDoc: (doc?: PosterDoc) => void;
   setSavedState: (state: "saved" | "saving") => void;
   selectBlock: (id?: string) => void;
   addBlock: (type: BlockType) => void;
-  updateBlock: (id: string, patch: Partial<Block>) => void;
-  updateBlockData: <T extends Block>(id: string, data: Partial<T["data"]>) => void;
+  updateBlock: (id: string, patch: Partial<Block>, options?: { commit?: boolean; historyBase?: PosterDoc }) => void;
+  updateBlockData: <T extends Block>(
+    id: string,
+    data: Partial<T["data"]>,
+    options?: { commit?: boolean; historyBase?: PosterDoc },
+  ) => void;
   deleteBlock: (id: string) => void;
   duplicateBlock: (id: string) => void;
   setZoom: (zoom: number) => void;
@@ -31,11 +37,11 @@ interface PosterState {
   redo: () => void;
 }
 
-function withHistory(state: PosterState, doc: PosterDoc) {
+function withHistory(state: PosterState, doc: PosterDoc, historyBase = state.doc) {
   return {
     doc,
     savedState: "saving" as const,
-    past: [...state.past.slice(-99), state.doc],
+    past: [...state.past.slice(-99), historyBase],
     future: [],
   };
 }
@@ -55,10 +61,11 @@ export const usePosterStore = create<PosterState>((set, get) => ({
   past: [],
   future: [],
   openGallery: () => set({ view: "gallery", selectedId: undefined }),
-  openEditor: (doc) => set({ doc, view: "editor", selectedId: undefined, past: [], future: [] }),
+  openEditor: (doc) => set({ doc, view: "editor", selectedId: undefined, savedState: "saving", past: [], future: [] }),
   openPrint: () => set({ view: "print", selectedId: undefined }),
   setDoc: (doc, commit = true) =>
     set((state) => (commit ? withHistory(state, doc) : { doc, savedState: "saving" })),
+  setAutosavedDoc: (autosavedDoc) => set({ autosavedDoc }),
   setSavedState: (savedState) => set({ savedState }),
   selectBlock: (selectedId) => set({ selectedId }),
   addBlock: (type) =>
@@ -70,23 +77,25 @@ export const usePosterStore = create<PosterState>((set, get) => ({
         selectedId: block.id,
       };
     }),
-  updateBlock: (id, patch) =>
-    set((state) =>
-      withHistory(
-        state,
-        replaceBlock(state.doc, id, (block) => ({ ...block, ...patch } as Block)),
-      ),
-    ),
-  updateBlockData: (id, data) =>
-    set((state) =>
-      withHistory(
-        state,
-        replaceBlock(state.doc, id, (block) => ({
-          ...block,
-          data: { ...block.data, ...data },
-        } as Block)),
-      ),
-    ),
+  updateBlock: (id, patch, options) =>
+    set((state) => {
+      const doc = replaceBlock(state.doc, id, (block) => ({ ...block, ...patch } as Block));
+      if (options?.commit === false) {
+        return { doc, savedState: "saving" };
+      }
+      return withHistory(state, doc, options?.historyBase);
+    }),
+  updateBlockData: (id, data, options) =>
+    set((state) => {
+      const doc = replaceBlock(state.doc, id, (block) => ({
+        ...block,
+        data: { ...block.data, ...data },
+      } as Block));
+      if (options?.commit === false) {
+        return { doc, savedState: "saving" };
+      }
+      return withHistory(state, doc, options?.historyBase);
+    }),
   deleteBlock: (id) =>
     set((state) => ({
       ...withHistory(state, { ...state.doc, blocks: state.doc.blocks.filter((block) => block.id !== id) }),

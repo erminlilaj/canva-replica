@@ -100,7 +100,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
         <thead>
           <tr>
             {block.data.columns.map((column, index) => (
-              <th key={`${column}-${index}`}>
+              <th key={index}>
                 <EditableText
                   value={column}
                   onCommit={(value) =>
@@ -115,7 +115,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
         </thead>
         <tbody>
           {block.data.rows.map((row, rowIndex) => (
-            <tr key={`${rowIndex}-${row.join("-")}`}>
+            <tr key={rowIndex}>
               {block.data.columns.map((_, colIndex) => (
                 <td key={`${rowIndex}-${colIndex}`}>
                   <EditableText value={row[colIndex] ?? ""} onCommit={(value) => commitCell(rowIndex, colIndex, value)} />
@@ -131,17 +131,18 @@ function TableRenderer({ block }: { block: TableBlock }) {
 
 function SwotRenderer({ block }: { block: SwotGridBlock }) {
   const update = usePosterStore((state) => state.updateBlockData);
+  const theme = themes[usePosterStore((state) => state.doc.theme)];
   return (
     <div className="swot-block">
       <div className="swot-risk">
         <EditableText value={block.data.riskLabel} onCommit={(riskLabel) => update<SwotGridBlock>(block.id, { riskLabel })} />
       </div>
       {block.data.columns.map((column, index) => (
-        <div className="swot-column" key={column.title} style={{ background: themes.school.softSlots[index + 1] }}>
+        <div className="swot-column" key={index} style={{ background: theme.softSlots[(index + 1) % theme.softSlots.length] }}>
           <strong>{column.title}</strong>
           <ul>
             {column.items.map((item, itemIndex) => (
-              <li key={`${item}-${itemIndex}`}>
+              <li key={itemIndex}>
                 <EditableText
                   value={item}
                   onCommit={(value) => {
@@ -185,7 +186,7 @@ function RiskRenderer({ block }: { block: RiskCardBlock }) {
       </div>
       <div className="risk-ratings">
         {block.data.ratings.map((rating, index) => (
-          <span key={`${rating}-${index}`}>{rating}</span>
+          <span key={index}>{rating}</span>
         ))}
       </div>
     </div>
@@ -200,7 +201,7 @@ function TeamRenderer({ block }: { block: TeamListBlock }) {
         <EditableText value={block.data.title} onCommit={(title) => update<TeamListBlock>(block.id, { title })} />
       </div>
       {block.data.members.map((member, index) => (
-        <div className="team-row" key={`${member.role}-${index}`}>
+        <div className="team-row" key={index}>
           <Users size={14} />
           <span>{member.role}</span>
           <strong>{member.name}</strong>
@@ -218,7 +219,7 @@ function ChecklistRenderer({ block }: { block: ChecklistBlock }) {
         <EditableText value={block.data.title} onCommit={(title) => update<ChecklistBlock>(block.id, { title })} />
       </div>
       {block.data.items.map((item, index) => (
-        <div className="check-row" key={`${item}-${index}`}>
+        <div className="check-row" key={index}>
           <Check size={14} />
           <EditableText
             value={item}
