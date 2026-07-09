@@ -155,4 +155,14 @@ export const sq = {
     block: "Blloku nuk u shfaq dot.",
     back: "Kthehu te galeria",
   },
+  coach: {
+    skip: "Kapërce",
+    next: "Tjetër",
+    done: "E kuptova",
+    steps: [
+      { title: "Shto blloqe", body: "Kliko ose tërhiq një bllok nga këtu për ta shtuar në poster." },
+      { title: "Redakto posterin", body: "Kliko një bllok për ta zgjedhur, ose kliko tekstin për ta ndryshuar drejtpërdrejt." },
+      { title: "Shkarko PDF", body: "Kur të mbarosh, shkarko posterin gati për printim këtu." },
+    ],
+  },
 };

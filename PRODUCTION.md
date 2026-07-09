@@ -113,7 +113,7 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 - [x] Multi-select (shift-click) + group move. *(Store field renamed `selectedId` → `selectedIds: string[]`; Inspector shows shared duplicate/delete actions when >1 selected, falls back to the normal single-block panel otherwise. Resize handles and layer reorder still act on one block at a time.)*
 - [x] Lock block toggle.
 - [x] "Dyfisho posterin" (duplicate whole poster) in gallery.
-- [ ] First-launch coach marks (max 3 tooltips: palette → canvas → export).
+- [x] First-launch coach marks (max 3 tooltips: palette → canvas → export).
 
 ---
 

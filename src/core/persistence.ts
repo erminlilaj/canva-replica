@@ -6,6 +6,7 @@ import { validatePosterDoc } from "./validate";
 const AUTOSAVE_KEY = "postera.autosave.v1";
 const INDEX_KEY = "postera.index.v1";
 const POSTER_KEY_PREFIX = "postera.poster.";
+const COACH_MARKS_KEY = "postera.coachmarks.v1";
 
 export interface PosterSummary {
   id: string;
@@ -91,4 +92,12 @@ export async function readPosterFile(file: File) {
     throw new Error("Invalid Postera file");
   }
   return ensurePosterIdentity(doc);
+}
+
+export async function hasSeenCoachMarks() {
+  return (await get<boolean>(COACH_MARKS_KEY)) === true;
+}
+
+export async function markCoachMarksSeen() {
+  await set(COACH_MARKS_KEY, true);
 }

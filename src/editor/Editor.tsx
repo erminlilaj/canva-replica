@@ -2,6 +2,7 @@ import { Canvas } from "./Canvas";
 import { Inspector } from "./Inspector";
 import { Palette } from "./Palette";
 import { Toolbar } from "./Toolbar";
+import { CoachMarks } from "../app/CoachMarks";
 import { sq } from "../i18n/sq";
 
 export function Editor() {
@@ -14,6 +15,7 @@ export function Editor() {
         <Canvas />
         <Inspector />
       </div>
+      <CoachMarks />
     </div>
   );
 }
