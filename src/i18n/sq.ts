@@ -75,6 +75,8 @@ export const sq = {
     removeRating: "Fshi vlerësimin",
     changePhoto: "Ndrysho foton",
     lowResPhoto: "Fotoja ka rezolucion të ulët dhe mund të dalë e turbullt në printim.",
+    icon: "Ikona",
+    noIcon: "Pa ikonë",
     fitCover: "Mbush kornizën",
     fitContain: "Shfaq të plotë",
     customColor: "Ngjyrë tjetër",

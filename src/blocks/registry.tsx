@@ -19,6 +19,7 @@ import type {
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
 import { sq } from "../i18n/sq";
+import { resolveIcon } from "./icons";
 
 export const blockIcons: Record<BlockType, typeof TextCursorInput> = {
   text: TextCursorInput,
@@ -225,6 +226,7 @@ function SectionRenderer({ block }: { block: SectionHeaderBlock }) {
 
 function TableRenderer({ block }: { block: TableBlock }) {
   const update = usePosterStore((state) => state.updateBlockData);
+  const RowIcon = block.data.leadingIcon ? resolveIcon(block.data.leadingIcon) : null;
   const commitCell = (rowIndex: number, colIndex: number, value: string) => {
     const rows = block.data.rows.map((row, index) =>
       index === rowIndex ? row.map((cell, cellIndex) => (cellIndex === colIndex ? value : cell)) : row,
@@ -274,6 +276,7 @@ function TableRenderer({ block }: { block: TableBlock }) {
               {block.data.columns.map((_, colIndex) => (
                 <td key={`${rowIndex}-${colIndex}`}>
                   {colIndex === 0 ? <RemoveButton label={sq.inspector.removeRow} onClick={() => removeRow(rowIndex)} /> : null}
+                  {colIndex === 0 && RowIcon ? <RowIcon size={12} className="table-row-icon" /> : null}
                   <EditableText value={row[colIndex] ?? ""} onCommit={(value) => commitCell(rowIndex, colIndex, value)} />
                 </td>
               ))}
@@ -368,6 +371,7 @@ function RiskRenderer({ block }: { block: RiskCardBlock }) {
 
 function TeamRenderer({ block }: { block: TeamListBlock }) {
   const update = usePosterStore((state) => state.updateBlockData);
+  const MemberIcon = resolveIcon(block.data.icon, Users);
   return (
     <div className="team-block">
       <div className="block-title" style={{ background: slotColor(block) }}>
@@ -375,7 +379,7 @@ function TeamRenderer({ block }: { block: TeamListBlock }) {
       </div>
       {block.data.members.map((member, index) => (
         <div className="team-row" key={index}>
-          <Users size={14} />
+          <MemberIcon size={14} />
           <span>{member.role}</span>
           <strong>{member.name}</strong>
           <RemoveButton

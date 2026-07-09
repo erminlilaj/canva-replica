@@ -3,9 +3,42 @@ import { ArrowDown, ArrowUp, Copy, Trash2, Upload } from "lucide-react";
 import { sq } from "../i18n/sq";
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
+import { iconOptions } from "../blocks/icons";
 import type { BlockStyleOverrides, ChecklistBlock, ImageFrameBlock, RiskCardBlock, SwotGridBlock, TableBlock, TeamListBlock } from "../core/types";
 
 const fontOptions = ["Inter, sans-serif", "Source Sans 3, sans-serif", "Merriweather, serif"];
+
+function IconPicker({
+  value,
+  onChange,
+  allowNone,
+}: {
+  value: string | undefined;
+  onChange: (icon: string | undefined) => void;
+  allowNone?: boolean;
+}) {
+  return (
+    <div className="icon-picker">
+      {allowNone ? (
+        <button type="button" className={`icon-picker-none ${!value ? "active" : ""}`} title={sq.inspector.noIcon} onClick={() => onChange(undefined)}>
+          {sq.inspector.noIcon}
+        </button>
+      ) : null}
+      {Object.entries(iconOptions).map(([id, Icon]) => (
+        <button
+          key={id}
+          type="button"
+          className={value === id ? "active" : ""}
+          aria-label={id}
+          title={id}
+          onClick={() => onChange(id)}
+        >
+          <Icon size={16} />
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function Inspector() {
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -151,6 +184,12 @@ export function Inspector() {
         <div className="inspector-actions">
           <button onClick={addRow}>{sq.inspector.addRow}</button>
           <button onClick={addColumn}>{sq.inspector.addColumn}</button>
+          <div className="control-label">{sq.inspector.icon}</div>
+          <IconPicker
+            value={block.data.leadingIcon}
+            allowNone
+            onChange={(icon) => updateBlockData<TableBlock>(block.id, { leadingIcon: icon })}
+          />
         </div>
       ) : null}
       {block.type === "checklist" ? (
@@ -163,6 +202,8 @@ export function Inspector() {
           <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: [...block.data.members, { role: sq.inspector.newMemberRole, name: sq.inspector.newMemberName }] })}>
             {sq.inspector.addMember}
           </button>
+          <div className="control-label">{sq.inspector.icon}</div>
+          <IconPicker value={block.data.icon} onChange={(icon) => updateBlockData<TeamListBlock>(block.id, { icon })} />
         </div>
       ) : null}
       {block.type === "swot" ? (

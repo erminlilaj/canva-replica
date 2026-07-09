@@ -107,6 +107,7 @@ export interface TeamListBlock extends BlockBase {
   type: "team";
   data: {
     title: string;
+    icon?: string;
     members: Array<{ role: string; name: string }>;
   };
 }

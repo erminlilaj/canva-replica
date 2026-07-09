@@ -108,7 +108,7 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 ## P3 — Post-launch niceties (do not block release)
 
 - [x] Floating mini text bar (size / align / color) on text edit, so text styling doesn't require the inspector. *(Bold dropped: the doc model stores plain `innerText`, not HTML — a real bold toggle needs rich-text storage, which AGENTS.md §3 explicitly defers to a future TipTap migration. Color swatches added instead, matching the inspector's existing controls.)*
-- [ ] Icon picker: wire `TableBlock.leadingIcon` and TeamList row icons to a curated ~30-icon Lucide subset.
+- [x] Icon picker: wire `TableBlock.leadingIcon` and TeamList row icons to a curated ~30-icon Lucide subset. *(Team icon applies to the whole member list rather than per-row — the reference template already uses one icon for every row, and per-member pickers would exceed the ~6-control inspector guideline in AGENTS.md.)*
 - [ ] Drag-from-palette in addition to click-to-add (drop at pointer position). Only reintroduce dnd-kit if built; otherwise reuse the existing pointer-drag machinery.
 - [ ] Multi-select (shift-click) + group move.
 - [ ] Lock block toggle.

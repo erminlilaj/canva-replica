@@ -711,6 +711,12 @@ input:focus-visible,
   opacity: 1;
 }
 
+.table-row-icon {
+  margin-right: 3px;
+  vertical-align: middle;
+  color: #526173;
+}
+
 .table-block th {
   background: rgba(255, 255, 255, 0.55);
   font-weight: 900;
@@ -924,6 +930,35 @@ input:focus-visible,
 
 .swatches button.active {
   box-shadow: 0 0 0 3px #172033;
+}
+
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.icon-picker button {
+  min-width: 32px;
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.icon-picker button.active {
+  border-color: #0f4c9a;
+  background: #eaf2ff;
+  color: #0f4c9a;
+}
+
+.icon-picker-none {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .inspector-actions {

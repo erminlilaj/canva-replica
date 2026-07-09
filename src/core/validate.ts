@@ -95,6 +95,7 @@ function validateBlock(value: unknown): Block | null {
       type: "team",
       data: {
         title: asString(data.title),
+        icon: typeof data.icon === "string" ? data.icon : undefined,
         members: data.members.filter(isRecord).map((member) => ({ role: asString(member.role), name: asString(member.name) })),
       },
     };
