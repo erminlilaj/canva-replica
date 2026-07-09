@@ -90,6 +90,7 @@ export const sq = {
     forward: "Përpara",
     backward: "Mbrapa",
     newColumnName: (index: number) => `Kolona ${index}`,
+    multiSelected: (count: number) => `${count} blloqe të zgjedhura`,
     newChecklistItem: "Pikë e re",
     newMemberRole: "rol",
     newMemberName: "Emri Mbiemri",

@@ -43,12 +43,15 @@ function IconPicker({
 export function Inspector() {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const doc = usePosterStore((state) => state.doc);
-  const selectedId = usePosterStore((state) => state.selectedId);
+  const selectedIds = usePosterStore((state) => state.selectedIds);
   const updateBlock = usePosterStore((state) => state.updateBlock);
   const updateBlockData = usePosterStore((state) => state.updateBlockData);
   const deleteBlock = usePosterStore((state) => state.deleteBlock);
+  const deleteSelectedBlocks = usePosterStore((state) => state.deleteSelectedBlocks);
   const duplicateBlock = usePosterStore((state) => state.duplicateBlock);
+  const duplicateSelectedBlocks = usePosterStore((state) => state.duplicateSelectedBlocks);
   const moveSelectedBlockLayer = usePosterStore((state) => state.moveSelectedBlockLayer);
+  const selectedId = selectedIds.length === 1 ? selectedIds[0] : undefined;
   const block = doc.blocks.find((item) => item.id === selectedId);
   const theme = themes[doc.theme];
   const imageSrc = block?.type === "image" ? block.data.src : undefined;
@@ -63,6 +66,30 @@ export function Inspector() {
     probe.onload = () => setLowResPhoto(Math.max(probe.naturalWidth, probe.naturalHeight) < 1000);
     probe.src = imageSrc;
   }, [imageSrc]);
+
+  if (selectedIds.length > 1) {
+    return (
+      <aside className="side-panel inspector">
+        <h2>{sq.inspector.title}</h2>
+        <p>{sq.inspector.multiSelected(selectedIds.length)}</p>
+        <div className="inspector-actions">
+          <button onClick={() => duplicateSelectedBlocks()}>
+            <Copy size={18} />
+            {sq.inspector.duplicate}
+          </button>
+          <button
+            className="danger"
+            onClick={() => {
+              if (window.confirm(sq.inspector.confirmDelete)) deleteSelectedBlocks();
+            }}
+          >
+            <Trash2 size={18} />
+            {sq.inspector.delete}
+          </button>
+        </div>
+      </aside>
+    );
+  }
 
   if (!block) {
     return (

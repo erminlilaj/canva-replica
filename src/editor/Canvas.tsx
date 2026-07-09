@@ -18,6 +18,8 @@ interface DragState {
   latestFrame: Frame;
   heightMm: number;
   edges: { v: number[]; h: number[] };
+  groupStartFrames: Map<string, Frame>;
+  groupLatestFrames: Map<string, Frame>;
 }
 
 interface Guides {
@@ -64,14 +66,16 @@ export function Canvas() {
   const pageRef = useRef<HTMLDivElement>(null);
   const spacePressed = useRef(false);
   const doc = usePosterStore((state) => state.doc);
-  const selectedId = usePosterStore((state) => state.selectedId);
+  const selectedIds = usePosterStore((state) => state.selectedIds);
   const zoom = usePosterStore((state) => state.zoom);
   const selectBlock = usePosterStore((state) => state.selectBlock);
+  const toggleSelectBlock = usePosterStore((state) => state.toggleSelectBlock);
   const updateBlock = usePosterStore((state) => state.updateBlock);
+  const updateBlocks = usePosterStore((state) => state.updateBlocks);
   const setZoom = usePosterStore((state) => state.setZoom);
   const undo = usePosterStore((state) => state.undo);
   const redo = usePosterStore((state) => state.redo);
-  const deleteBlock = usePosterStore((state) => state.deleteBlock);
+  const deleteSelectedBlocks = usePosterStore((state) => state.deleteSelectedBlocks);
   const nudgeSelectedBlock = usePosterStore((state) => state.nudgeSelectedBlock);
   const [drag, setDrag] = useState<DragState>();
   const [pan, setPan] = useState<PanState>();
@@ -113,9 +117,9 @@ export function Canvas() {
         redo();
         return;
       }
-      if (event.key === "Delete" && selectedId) {
+      if (event.key === "Delete" && selectedIds.length > 0) {
         event.preventDefault();
-        if (window.confirm(sq.inspector.confirmDelete)) deleteBlock(selectedId);
+        if (window.confirm(sq.inspector.confirmDelete)) deleteSelectedBlocks();
         return;
       }
       if (event.key === "Escape") {
@@ -146,21 +150,31 @@ export function Canvas() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
     };
-  }, [deleteBlock, nudgeSelectedBlock, redo, selectBlock, selectedId, undo]);
+  }, [deleteSelectedBlocks, nudgeSelectedBlock, redo, selectBlock, selectedIds, undo]);
 
   const startDrag = (event: PointerEvent, block: Block, mode: DragMode) => {
     event.preventDefault();
     event.stopPropagation();
-    selectBlock(block.id);
+    const isGroupMove = mode === "move" && selectedIds.includes(block.id) && selectedIds.length > 1;
+    if (!isGroupMove) selectBlock(block.id);
+
     const measuredHeights = new Map<string, number>();
     pageRef.current?.querySelectorAll<HTMLElement>("[data-block-id]").forEach((element) => {
       if (element.dataset.blockId) measuredHeights.set(element.dataset.blockId, element.offsetHeight / PX_PER_MM);
     });
     const blockHeightMm = (item: Block) =>
       typeof item.frame.h === "number" ? item.frame.h : measuredHeights.get(item.id) ?? 20;
+
+    const groupIds = isGroupMove ? selectedIds : [block.id];
+    const groupStartFrames = new Map<string, Frame>();
+    for (const id of groupIds) {
+      const other = doc.blocks.find((item) => item.id === id);
+      if (other) groupStartFrames.set(id, other.frame);
+    }
+
     const edges: DragState["edges"] = { v: [0, page.w / 2, page.w], h: [0, page.h / 2, page.h] };
     for (const other of doc.blocks) {
-      if (other.id === block.id) continue;
+      if (groupIds.includes(other.id)) continue;
       const otherH = blockHeightMm(other);
       edges.v.push(other.frame.x, other.frame.x + other.frame.w / 2, other.frame.x + other.frame.w);
       edges.h.push(other.frame.y, other.frame.y + otherH / 2, other.frame.y + otherH);
@@ -175,20 +189,33 @@ export function Canvas() {
       latestFrame: block.frame,
       heightMm: blockHeightMm(block),
       edges,
+      groupStartFrames,
+      groupLatestFrames: new Map(groupStartFrames),
     });
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const moveDrag = (event: PointerEvent) => {
     if (!drag) return;
-    let nextFrame: Frame;
     if (drag.mode === "move") {
-      const rawX = drag.frame.x + pxToMm((event.clientX - drag.startX) / zoom);
-      const rawY = drag.frame.y + pxToMm((event.clientY - drag.startY) / zoom);
-      const snapX = snapToEdges(rawX, drag.frame.w, drag.edges.v);
+      const primaryStart = drag.groupStartFrames.get(drag.id) ?? drag.frame;
+      const rawX = primaryStart.x + pxToMm((event.clientX - drag.startX) / zoom);
+      const rawY = primaryStart.y + pxToMm((event.clientY - drag.startY) / zoom);
+      const snapX = snapToEdges(rawX, primaryStart.w, drag.edges.v);
       const snapY = snapToEdges(rawY, drag.heightMm, drag.edges.h);
-      nextFrame = { ...drag.frame, x: snapX?.value ?? snapMm(rawX), y: snapY?.value ?? snapMm(rawY) };
+      const dx = (snapX?.value ?? snapMm(rawX)) - primaryStart.x;
+      const dy = (snapY?.value ?? snapMm(rawY)) - primaryStart.y;
       setGuides({ v: snapX ? [snapX.guide] : [], h: snapY ? [snapY.guide] : [] });
+
+      const nextLatest = new Map<string, Frame>();
+      const patches: Array<{ id: string; frame: Frame }> = [];
+      drag.groupStartFrames.forEach((startFrame, id) => {
+        const frame = clampFrame({ ...startFrame, x: startFrame.x + dx, y: startFrame.y + dy }, page);
+        nextLatest.set(id, frame);
+        patches.push({ id, frame });
+      });
+      setDrag((current) => (current ? { ...current, latestFrame: nextLatest.get(drag.id) ?? current.latestFrame, groupLatestFrames: nextLatest } : current));
+      updateBlocks(patches, { commit: false });
     } else {
       const dx = snapMm(pxToMm((event.clientX - drag.startX) / zoom));
       const dy = snapMm(pxToMm((event.clientY - drag.startY) / zoom));
@@ -197,16 +224,24 @@ export function Canvas() {
         typeof drag.frame.h === "number" && drag.mode !== "resize-e"
           ? Math.max(10, snapMm(drag.frame.h + dy))
           : drag.frame.h;
-      nextFrame = { ...drag.frame, w, h };
+      const frame = clampFrame({ ...drag.frame, w, h }, page);
+      setDrag((current) => (current ? { ...current, latestFrame: frame, groupLatestFrames: new Map([[drag.id, frame]]) } : current));
+      updateBlock(drag.id, { frame }, { commit: false });
     }
-    const frame = clampFrame(nextFrame, page);
-    setDrag((current) => (current ? { ...current, latestFrame: frame } : current));
-    updateBlock(drag.id, { frame }, { commit: false });
   };
 
   const endDrag = () => {
     if (!drag) return;
-    if (!sameFrame(drag.frame, drag.latestFrame)) {
+    if (drag.mode === "move") {
+      const patches: Array<{ id: string; frame: Frame }> = [];
+      drag.groupStartFrames.forEach((startFrame, id) => {
+        const latest = drag.groupLatestFrames.get(id);
+        if (latest && !sameFrame(startFrame, latest)) patches.push({ id, frame: latest });
+      });
+      if (patches.length > 0) {
+        updateBlocks(patches, { historyBase: drag.historyBase });
+      }
+    } else if (!sameFrame(drag.frame, drag.latestFrame)) {
       updateBlock(drag.id, { frame: drag.latestFrame }, { historyBase: drag.historyBase });
     }
     setDrag(undefined);
@@ -284,11 +319,12 @@ export function Canvas() {
             <div
               key={block.id}
               data-block-id={block.id}
-              className={`poster-block ${selectedId === block.id ? "selected" : ""}`}
+              className={`poster-block ${selectedIds.includes(block.id) ? "selected" : ""}`}
               style={frameStyle(block.frame)}
               onPointerDown={(event) => {
                 event.stopPropagation();
-                selectBlock(block.id);
+                if (event.shiftKey) toggleSelectBlock(block.id);
+                else selectBlock(block.id);
               }}
             >
               <button

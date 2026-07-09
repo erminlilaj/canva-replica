@@ -55,13 +55,47 @@ describe("store: history", () => {
   });
 });
 
+describe("store: multi-select", () => {
+  it("toggleSelectBlock builds up a selection and updateBlocks moves all selected blocks in one history entry", () => {
+    const { toggleSelectBlock, updateBlocks } = usePosterStore.getState();
+    toggleSelectBlock("text-1");
+    toggleSelectBlock("table-1");
+    expect(usePosterStore.getState().selectedIds).toEqual(["text-1", "table-1"]);
+
+    const historyBase = usePosterStore.getState().doc;
+    updateBlocks(
+      [
+        { id: "text-1", frame: { x: 20, y: 20, w: 40, h: "auto" } },
+        { id: "table-1", frame: { x: 20, y: 50, w: 60, h: "auto" } },
+      ],
+      { historyBase },
+    );
+
+    const state = usePosterStore.getState();
+    expect(state.past).toHaveLength(1);
+    expect(state.doc.blocks.find((b) => b.id === "text-1")?.frame.x).toBe(20);
+    expect(state.doc.blocks.find((b) => b.id === "table-1")?.frame.x).toBe(20);
+  });
+
+  it("deleteSelectedBlocks removes every selected block at once", () => {
+    const { toggleSelectBlock, deleteSelectedBlocks } = usePosterStore.getState();
+    toggleSelectBlock("text-1");
+    toggleSelectBlock("table-1");
+    deleteSelectedBlocks();
+
+    const state = usePosterStore.getState();
+    expect(state.doc.blocks).toHaveLength(0);
+    expect(state.selectedIds).toEqual([]);
+  });
+});
+
 describe("store: duplicateBlock", () => {
   it("deep-copies a block so mutating the copy's data does not touch the original", () => {
     const { duplicateBlock, updateBlockData } = usePosterStore.getState();
     duplicateBlock("text-1");
 
     const state = usePosterStore.getState();
-    const copyId = state.selectedId as string;
+    const copyId = state.selectedIds[0];
     expect(copyId).not.toBe("text-1");
     expect(state.doc.blocks).toHaveLength(3);
 
