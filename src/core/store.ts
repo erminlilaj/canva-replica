@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { firstFreeFrame, pageSizeMm } from "./geometry";
-import type { Block, BlockType, PosterDoc, ThemeId } from "./types";
+import { clampFrame, firstFreeFrame, pageSizeMm } from "./geometry";
+import type { Block, BlockType, PageOrientation, PageSize, PosterDoc, ThemeId } from "./types";
 import { makeDefaultBlock } from "./defaultBlocks";
 import { riskAssessmentTemplate } from "../templates/riskAssessment";
 
@@ -22,6 +22,8 @@ interface PosterState {
   setAutosavedDoc: (doc?: PosterDoc) => void;
   setSavedState: (state: "saved" | "saving") => void;
   selectBlock: (id?: string) => void;
+  setPage: (page: { size?: PageSize; orientation?: PageOrientation }) => void;
+  setDocumentFonts: (fonts: { heading?: string; body?: string }) => void;
   addBlock: (type: BlockType) => void;
   updateBlock: (id: string, patch: Partial<Block>, options?: { commit?: boolean; historyBase?: PosterDoc }) => void;
   updateBlockData: <T extends Block>(
@@ -31,6 +33,8 @@ interface PosterState {
   ) => void;
   deleteBlock: (id: string) => void;
   duplicateBlock: (id: string) => void;
+  nudgeSelectedBlock: (dx: number, dy: number) => void;
+  moveSelectedBlockLayer: (direction: "forward" | "backward") => void;
   setZoom: (zoom: number) => void;
   setTheme: (theme: ThemeId) => void;
   undo: () => void;
@@ -68,6 +72,20 @@ export const usePosterStore = create<PosterState>((set, get) => ({
   setAutosavedDoc: (autosavedDoc) => set({ autosavedDoc }),
   setSavedState: (savedState) => set({ savedState }),
   selectBlock: (selectedId) => set({ selectedId }),
+  setPage: (page) =>
+    set((state) =>
+      withHistory(state, {
+        ...state.doc,
+        page: { ...state.doc.page, ...page },
+      }),
+    ),
+  setDocumentFonts: (fonts) =>
+    set((state) =>
+      withHistory(state, {
+        ...state.doc,
+        fonts: { ...state.doc.fonts, ...fonts },
+      }),
+    ),
   addBlock: (type) =>
     set((state) => {
       const page = pageSizeMm(state.doc.page.size, state.doc.page.orientation);
@@ -114,6 +132,28 @@ export const usePosterStore = create<PosterState>((set, get) => ({
         ...withHistory(state, { ...state.doc, blocks: [...state.doc.blocks, copy] }),
         selectedId: copy.id,
       };
+    }),
+  nudgeSelectedBlock: (dx, dy) =>
+    set((state) => {
+      if (!state.selectedId) return state;
+      const page = pageSizeMm(state.doc.page.size, state.doc.page.orientation);
+      const doc = replaceBlock(state.doc, state.selectedId, (block) => ({
+        ...block,
+        frame: clampFrame({ ...block.frame, x: block.frame.x + dx, y: block.frame.y + dy }, page),
+      } as Block));
+      return withHistory(state, doc);
+    }),
+  moveSelectedBlockLayer: (direction) =>
+    set((state) => {
+      if (!state.selectedId) return state;
+      const index = state.doc.blocks.findIndex((block) => block.id === state.selectedId);
+      if (index < 0) return state;
+      const nextIndex = direction === "forward" ? Math.min(state.doc.blocks.length - 1, index + 1) : Math.max(0, index - 1);
+      if (index === nextIndex) return state;
+      const blocks = [...state.doc.blocks];
+      const [block] = blocks.splice(index, 1);
+      blocks.splice(nextIndex, 0, block);
+      return withHistory(state, { ...state.doc, blocks });
     }),
   setZoom: (zoom) => set({ zoom: Math.max(0.25, Math.min(4, zoom)) }),
   setTheme: (theme) => set((state) => withHistory(state, { ...state.doc, theme })),

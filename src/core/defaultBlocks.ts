@@ -5,6 +5,27 @@ export function makeDefaultBlock(type: BlockType, frame: Frame): Block {
   if (type === "section") {
     return { id, type, frame: { ...frame, w: 120 }, style: { colorSlot: 0 }, data: { title: "KREU I", badge: "I" } };
   }
+  if (type === "box") {
+    return {
+      id,
+      type,
+      frame: { ...frame, w: 90, h: 38 },
+      style: { colorSlot: 1, align: "center" },
+      data: { text: "Kuti me ngjyrë" },
+    };
+  }
+  if (type === "divider") {
+    return { id, type, frame: { ...frame, w: 120, h: 8 }, style: { colorSlot: 0 }, data: { label: "" } };
+  }
+  if (type === "stat") {
+    return {
+      id,
+      type,
+      frame: { ...frame, w: 70, h: "auto" },
+      style: { colorSlot: 2, align: "center" },
+      data: { value: "95%", label: "Pjesëmarrje" },
+    };
+  }
   if (type === "table") {
     return {
       id,

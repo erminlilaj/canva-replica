@@ -4,7 +4,9 @@ import { themes } from "../core/themes";
 import { downloadPoster, readPosterFile } from "../core/persistence";
 import { usePosterStore } from "../core/store";
 import { sq } from "../i18n/sq";
-import type { ThemeId } from "../core/types";
+import type { PageOrientation, PageSize, ThemeId } from "../core/types";
+
+const fontOptions = ["Inter, sans-serif", "Source Sans 3, sans-serif", "Merriweather, serif"];
 
 export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -16,6 +18,8 @@ export function Toolbar() {
   const openPrint = usePosterStore((state) => state.openPrint);
   const setZoom = usePosterStore((state) => state.setZoom);
   const setTheme = usePosterStore((state) => state.setTheme);
+  const setPage = usePosterStore((state) => state.setPage);
+  const setDocumentFonts = usePosterStore((state) => state.setDocumentFonts);
   const undo = usePosterStore((state) => state.undo);
   const redo = usePosterStore((state) => state.redo);
 
@@ -33,7 +37,13 @@ export function Toolbar() {
 
   return (
     <header className="toolbar">
-      <button className="icon-text" onClick={openGallery}>
+      <button
+        className="icon-text"
+        onClick={() => {
+          if (savedState === "saving" && !window.confirm(sq.toolbar.leaveUnsaved)) return;
+          openGallery();
+        }}
+      >
         <ArrowLeft size={20} />
         {sq.toolbar.back}
       </button>
@@ -53,14 +63,40 @@ export function Toolbar() {
         <button aria-label={sq.toolbar.zoomIn} title={sq.toolbar.zoomIn} onClick={() => setZoom(zoom + 0.1)}>
           <Plus size={20} />
         </button>
-        <button onClick={() => setZoom(0.55)}>{sq.toolbar.fit}</button>
+        <button onClick={() => window.dispatchEvent(new CustomEvent("postera:fit-page"))}>{sq.toolbar.fit}</button>
       </div>
+      <label className="theme-picker">
+        {sq.toolbar.pageSize}
+        <select value={doc.page.size} onChange={(event) => setPage({ size: event.target.value as PageSize })}>
+          <option value="A4">A4</option>
+          <option value="A3">A3</option>
+          <option value="A2">A2</option>
+        </select>
+      </label>
+      <label className="theme-picker">
+        {sq.toolbar.orientation}
+        <select value={doc.page.orientation} onChange={(event) => setPage({ orientation: event.target.value as PageOrientation })}>
+          <option value="portrait">{sq.toolbar.portrait}</option>
+          <option value="landscape">{sq.toolbar.landscape}</option>
+        </select>
+      </label>
       <label className="theme-picker">
         {sq.toolbar.theme}
         <select value={doc.theme} onChange={(event) => setTheme(event.target.value as ThemeId)}>
           {Object.values(themes).map((theme) => (
             <option key={theme.id} value={theme.id}>
               {theme.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="theme-picker compact-picker">
+        {sq.toolbar.bodyFont}
+        <select value={doc.fonts?.body ?? ""} onChange={(event) => setDocumentFonts({ body: event.target.value || undefined })}>
+          <option value="">--</option>
+          {fontOptions.map((font) => (
+            <option key={font} value={font}>
+              {font.split(",")[0]}
             </option>
           ))}
         </select>

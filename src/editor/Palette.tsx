@@ -5,6 +5,9 @@ import { sq } from "../i18n/sq";
 
 const blocks: Array<{ type: BlockType; label: string }> = [
   { type: "text", label: sq.palette.text },
+  { type: "box", label: sq.palette.box },
+  { type: "divider", label: sq.palette.divider },
+  { type: "stat", label: sq.palette.stat },
   { type: "section", label: sq.palette.section },
   { type: "table", label: sq.palette.table },
   { type: "swot", label: sq.palette.swot },

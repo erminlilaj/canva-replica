@@ -1,11 +1,14 @@
-import { Check, Image, ListChecks, Table2, Target, TextCursorInput, Users, Boxes } from "lucide-react";
+import { Check, Image, ListChecks, Minus, Square, Table2, Target, TextCursorInput, Users, Boxes, Hash } from "lucide-react";
 import type {
   Block,
   BlockType,
+  BoxBlock,
   ChecklistBlock,
+  DividerBlock,
   ImageFrameBlock,
   RiskCardBlock,
   SectionHeaderBlock,
+  StatBlock,
   SwotGridBlock,
   TableBlock,
   TeamListBlock,
@@ -17,6 +20,9 @@ import { sq } from "../i18n/sq";
 
 export const blockIcons: Record<BlockType, typeof TextCursorInput> = {
   text: TextCursorInput,
+  box: Square,
+  divider: Minus,
+  stat: Hash,
   section: Boxes,
   table: Table2,
   swot: Target,
@@ -45,6 +51,11 @@ function EditableText({
       contentEditable
       suppressContentEditableWarning
       onPointerDown={(event) => event.stopPropagation()}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.currentTarget.blur();
+        }
+      }}
       onBlur={(event) => onCommit(event.currentTarget.innerText.trim())}
     >
       {value}
@@ -54,7 +65,7 @@ function EditableText({
 
 function slotColor(block: Block, fallback = 0) {
   const theme = themes[usePosterStore.getState().doc.theme];
-  return theme.slots[block.style?.colorSlot ?? fallback];
+  return block.style?.accent ?? theme.slots[block.style?.colorSlot ?? fallback];
 }
 
 function softColor(block: Block, fallback = 0) {
@@ -64,9 +75,44 @@ function softColor(block: Block, fallback = 0) {
 
 function TextRenderer({ block }: { block: TextBlock }) {
   const update = usePosterStore((state) => state.updateBlockData);
+  const bodyFont = usePosterStore((state) => state.doc.fonts?.body);
+  const fontFamily = block.style?.fontFamily ?? bodyFont;
   return (
-    <div className={`text-block text-${block.style?.size ?? "body"} align-${block.style?.align ?? "left"}`}>
+    <div className={`text-block text-${block.style?.size ?? "body"} align-${block.style?.align ?? "left"}`} style={{ fontFamily }}>
       <EditableText value={block.data.text} onCommit={(text) => update<TextBlock>(block.id, { text })} />
+    </div>
+  );
+}
+
+function BoxRenderer({ block }: { block: BoxBlock }) {
+  const update = usePosterStore((state) => state.updateBlockData);
+  return (
+    <div className={`box-block align-${block.style?.align ?? "center"}`} style={{ background: softColor(block), borderColor: slotColor(block), color: slotColor(block) }}>
+      <EditableText value={block.data.text} onCommit={(text) => update<BoxBlock>(block.id, { text })} />
+    </div>
+  );
+}
+
+function DividerRenderer({ block }: { block: DividerBlock }) {
+  const update = usePosterStore((state) => state.updateBlockData);
+  return (
+    <div className="divider-block" style={{ color: slotColor(block) }}>
+      <span style={{ background: slotColor(block) }} />
+      {block.data.label ? <EditableText value={block.data.label} onCommit={(label) => update<DividerBlock>(block.id, { label })} /> : null}
+    </div>
+  );
+}
+
+function StatRenderer({ block }: { block: StatBlock }) {
+  const update = usePosterStore((state) => state.updateBlockData);
+  return (
+    <div className={`stat-block align-${block.style?.align ?? "center"}`} style={{ borderColor: slotColor(block), background: softColor(block) }}>
+      <strong style={{ color: slotColor(block) }}>
+        <EditableText value={block.data.value} onCommit={(value) => update<StatBlock>(block.id, { value })} />
+      </strong>
+      <span>
+        <EditableText value={block.data.label} onCommit={(label) => update<StatBlock>(block.id, { label })} />
+      </span>
     </div>
   );
 }
@@ -88,6 +134,9 @@ function TableRenderer({ block }: { block: TableBlock }) {
       index === rowIndex ? row.map((cell, cellIndex) => (cellIndex === colIndex ? value : cell)) : row,
     );
     update<TableBlock>(block.id, { rows });
+  };
+  const removeRow = (rowIndex: number) => {
+    update<TableBlock>(block.id, { rows: block.data.rows.filter((_, index) => index !== rowIndex) });
   };
   return (
     <div className="table-block" style={{ borderColor: slotColor(block), background: softColor(block) }}>
@@ -118,6 +167,11 @@ function TableRenderer({ block }: { block: TableBlock }) {
             <tr key={rowIndex}>
               {block.data.columns.map((_, colIndex) => (
                 <td key={`${rowIndex}-${colIndex}`}>
+                  {colIndex === 0 ? (
+                    <button className="inline-remove" type="button" aria-label={sq.inspector.removeRow} onClick={() => removeRow(rowIndex)}>
+                      ×
+                    </button>
+                  ) : null}
                   <EditableText value={row[colIndex] ?? ""} onCommit={(value) => commitCell(rowIndex, colIndex, value)} />
                 </td>
               ))}
@@ -246,6 +300,9 @@ function ImageRenderer({ block }: { block: ImageFrameBlock }) {
 }
 
 export function BlockRenderer({ block }: BlockRendererProps) {
+  if (block.type === "box") return <BoxRenderer block={block} />;
+  if (block.type === "divider") return <DividerRenderer block={block} />;
+  if (block.type === "stat") return <StatRenderer block={block} />;
   if (block.type === "section") return <SectionRenderer block={block} />;
   if (block.type === "table") return <TableRenderer block={block} />;
   if (block.type === "swot") return <SwotRenderer block={block} />;

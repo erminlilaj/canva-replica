@@ -204,6 +204,8 @@ Each milestone ends in a demoable state. Do not start N+1 with N broken.
 - All geometry math in `core/geometry.ts` with unit tests (mm↔px, snapping, overlap).
 - Every user-facing string goes through `i18n/sq.ts`. PR check: grep for hardcoded Albanian/English strings in JSX.
 - No new dependencies without noting why in this file. Especially: no canvas libs, no CSS frameworks beyond the chosen one, no state libs beyond Zustand.
+  - `@fontsource/inter`, `@fontsource/source-sans-3`, and `@fontsource/merriweather` are included to self-host `.woff2` fonts for consistent print/PDF output.
+  - `vitest` is included as the lightweight unit-test runner for core geometry and other pure TypeScript logic.
 - Do not use `localStorage`/`sessionStorage` anywhere; IndexedDB + files only.
 - Performance floor: dragging must stay 60fps with 40 blocks on the page (memoize block renders; only the dragged block re-renders during drag).
 - Accessibility floor: all toolbar/inspector controls keyboard-reachable, visible focus, labels on icon-only buttons.

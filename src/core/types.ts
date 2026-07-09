@@ -3,6 +3,9 @@ export type PageOrientation = "portrait" | "landscape";
 export type ThemeId = "school" | "fresh" | "warm" | "formal";
 export type BlockType =
   | "text"
+  | "box"
+  | "divider"
+  | "stat"
   | "section"
   | "table"
   | "swot"
@@ -16,6 +19,7 @@ export interface PosterDoc {
   title: string;
   page: { size: PageSize; orientation: PageOrientation };
   theme: ThemeId;
+  fonts?: { heading?: string; body?: string };
   blocks: Block[];
 }
 
@@ -31,6 +35,7 @@ export interface BlockStyleOverrides {
   accent?: string;
   align?: "left" | "center" | "right";
   size?: "title" | "subtitle" | "body";
+  fontFamily?: string;
 }
 
 export interface BlockBase {
@@ -43,6 +48,21 @@ export interface BlockBase {
 export interface TextBlock extends BlockBase {
   type: "text";
   data: { text: string };
+}
+
+export interface BoxBlock extends BlockBase {
+  type: "box";
+  data: { text: string };
+}
+
+export interface DividerBlock extends BlockBase {
+  type: "divider";
+  data: { label?: string };
+}
+
+export interface StatBlock extends BlockBase {
+  type: "stat";
+  data: { value: string; label: string };
 }
 
 export interface SectionHeaderBlock extends BlockBase {
@@ -108,6 +128,9 @@ export interface ImageFrameBlock extends BlockBase {
 
 export type Block =
   | TextBlock
+  | BoxBlock
+  | DividerBlock
+  | StatBlock
   | SectionHeaderBlock
   | TableBlock
   | SwotGridBlock

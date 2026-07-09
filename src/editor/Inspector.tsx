@@ -1,16 +1,21 @@
-import { Copy, Trash2 } from "lucide-react";
+import { ChangeEvent, useRef } from "react";
+import { ArrowDown, ArrowUp, Copy, Trash2, Upload } from "lucide-react";
 import { sq } from "../i18n/sq";
 import { themes } from "../core/themes";
 import { usePosterStore } from "../core/store";
-import type { TableBlock } from "../core/types";
+import type { BlockStyleOverrides, ChecklistBlock, ImageFrameBlock, RiskCardBlock, SwotGridBlock, TableBlock, TeamListBlock } from "../core/types";
+
+const fontOptions = ["Inter, sans-serif", "Source Sans 3, sans-serif", "Merriweather, serif"];
 
 export function Inspector() {
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const doc = usePosterStore((state) => state.doc);
   const selectedId = usePosterStore((state) => state.selectedId);
   const updateBlock = usePosterStore((state) => state.updateBlock);
   const updateBlockData = usePosterStore((state) => state.updateBlockData);
   const deleteBlock = usePosterStore((state) => state.deleteBlock);
   const duplicateBlock = usePosterStore((state) => state.duplicateBlock);
+  const moveSelectedBlockLayer = usePosterStore((state) => state.moveSelectedBlockLayer);
   const block = doc.blocks.find((item) => item.id === selectedId);
   const theme = themes[doc.theme];
 
@@ -23,7 +28,8 @@ export function Inspector() {
     );
   }
 
-  const setColor = (colorSlot: number) => updateBlock(block.id, { style: { ...block.style, colorSlot } });
+  const setColor = (colorSlot: number) => updateBlock(block.id, { style: { ...block.style, colorSlot, accent: undefined } });
+  const setCustomColor = (accent: string) => updateBlock(block.id, { style: { ...block.style, accent } });
   const addRow = () => {
     if (block.type !== "table") return;
     updateBlockData<TableBlock>(block.id, {
@@ -36,6 +42,30 @@ export function Inspector() {
       columns: [...block.data.columns, `Kolona ${block.data.columns.length + 1}`],
       rows: block.data.rows.map((row) => [...row, ""]),
     });
+  };
+  const removeColumn = () => {
+    if (block.type !== "table" || block.data.columns.length <= 1) return;
+    const index = block.data.columns.length - 1;
+    updateBlockData<TableBlock>(block.id, {
+      columns: block.data.columns.filter((_, colIndex) => colIndex !== index),
+      rows: block.data.rows.map((row) => row.filter((_, colIndex) => colIndex !== index)),
+    });
+  };
+  const removeRow = () => {
+    if (block.type !== "table" || block.data.rows.length === 0) return;
+    updateBlockData<TableBlock>(block.id, { rows: block.data.rows.slice(0, -1) });
+  };
+  const handleImageFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || block.type !== "image") return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        updateBlockData<ImageFrameBlock>(block.id, { src: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
   };
 
   return (
@@ -69,13 +99,129 @@ export function Inspector() {
           />
         ))}
       </div>
+      <label>
+        {sq.inspector.customColor}
+        <input type="color" value={block.style?.accent ?? theme.slots[block.style?.colorSlot ?? 0]} onChange={(event) => setCustomColor(event.target.value)} />
+      </label>
+      {block.type === "text" ? (
+        <div className="compact-controls">
+          <label>
+            {sq.inspector.size}
+            <select
+              value={block.style?.size ?? "body"}
+              onChange={(event) =>
+                updateBlock(block.id, { style: { ...block.style, size: event.target.value as BlockStyleOverrides["size"] } })
+              }
+            >
+              <option value="title">{sq.inspector.titleSize}</option>
+              <option value="subtitle">{sq.inspector.subtitleSize}</option>
+              <option value="body">{sq.inspector.bodySize}</option>
+            </select>
+          </label>
+          <label>
+            {sq.inspector.align}
+            <select
+              value={block.style?.align ?? "left"}
+              onChange={(event) =>
+                updateBlock(block.id, { style: { ...block.style, align: event.target.value as BlockStyleOverrides["align"] } })
+              }
+            >
+              <option value="left">{sq.inspector.left}</option>
+              <option value="center">{sq.inspector.center}</option>
+              <option value="right">{sq.inspector.right}</option>
+            </select>
+          </label>
+          <label>
+            {sq.toolbar.bodyFont}
+            <select
+              value={block.style?.fontFamily ?? ""}
+              onChange={(event) => updateBlock(block.id, { style: { ...block.style, fontFamily: event.target.value || undefined } })}
+            >
+              <option value="">--</option>
+              {fontOptions.map((font) => (
+                <option key={font} value={font}>
+                  {font.split(",")[0]}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
       {block.type === "table" ? (
         <div className="inspector-actions">
           <button onClick={addRow}>{sq.inspector.addRow}</button>
           <button onClick={addColumn}>{sq.inspector.addColumn}</button>
+          <button onClick={removeRow}>{sq.inspector.removeRow}</button>
+          <button onClick={removeColumn}>{sq.inspector.removeColumn}</button>
+        </div>
+      ) : null}
+      {block.type === "checklist" ? (
+        <div className="inspector-actions">
+          <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: [...block.data.items, "Pikë e re"] })}>{sq.inspector.addItem}</button>
+          <button onClick={() => updateBlockData<ChecklistBlock>(block.id, { items: block.data.items.slice(0, -1) })}>{sq.inspector.removeItem}</button>
+        </div>
+      ) : null}
+      {block.type === "team" ? (
+        <div className="inspector-actions">
+          <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: [...block.data.members, { role: "rol", name: "Emri Mbiemri" }] })}>
+            {sq.inspector.addMember}
+          </button>
+          <button onClick={() => updateBlockData<TeamListBlock>(block.id, { members: block.data.members.slice(0, -1) })}>{sq.inspector.removeMember}</button>
+        </div>
+      ) : null}
+      {block.type === "swot" ? (
+        <div className="inspector-actions">
+          {block.data.columns.map((column, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                const columns = block.data.columns.map((entry, columnIndex) =>
+                  columnIndex === index ? { ...entry, items: [...entry.items, "Pikë e re"] } : entry,
+                );
+                updateBlockData<SwotGridBlock>(block.id, { columns });
+              }}
+            >
+              {sq.inspector.addItem}: {column.title}
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              const columns = block.data.columns.map((entry) => ({ ...entry, items: entry.items.slice(0, -1) }));
+              updateBlockData<SwotGridBlock>(block.id, { columns });
+            }}
+          >
+            {sq.inspector.removeItem}
+          </button>
+        </div>
+      ) : null}
+      {block.type === "risk" ? (
+        <div className="inspector-actions">
+          <button onClick={() => updateBlockData<RiskCardBlock>(block.id, { ratings: [...block.data.ratings, "1 x 1 = 1"] })}>{sq.inspector.addRating}</button>
+          <button onClick={() => updateBlockData<RiskCardBlock>(block.id, { ratings: block.data.ratings.slice(0, -1) })}>{sq.inspector.removeRating}</button>
+        </div>
+      ) : null}
+      {block.type === "image" ? (
+        <div className="inspector-actions">
+          <button onClick={() => imageInputRef.current?.click()}>
+            <Upload size={18} />
+            {sq.inspector.changePhoto}
+          </button>
+          <select value={block.data.fit} onChange={(event) => updateBlockData<ImageFrameBlock>(block.id, { fit: event.target.value as ImageFrameBlock["data"]["fit"] })}>
+            <option value="cover">{sq.inspector.fitCover}</option>
+            <option value="contain">{sq.inspector.fitContain}</option>
+          </select>
+          <input ref={imageInputRef} className="hidden-input" type="file" accept="image/*" onChange={handleImageFile} />
         </div>
       ) : null}
       <div className="inspector-actions">
+        <button onClick={() => moveSelectedBlockLayer("forward")}>
+          <ArrowUp size={18} />
+          {sq.inspector.forward}
+        </button>
+        <button onClick={() => moveSelectedBlockLayer("backward")}>
+          <ArrowDown size={18} />
+          {sq.inspector.backward}
+        </button>
         <button onClick={() => duplicateBlock(block.id)}>
           <Copy size={18} />
           {sq.inspector.duplicate}

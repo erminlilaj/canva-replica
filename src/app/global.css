@@ -105,6 +105,11 @@ input:focus-visible,
   background: #fdfaf3;
 }
 
+.template-card:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .template-card strong {
   display: block;
   margin-bottom: 8px;
@@ -181,6 +186,14 @@ input:focus-visible,
   border-radius: 8px;
   padding: 0 10px;
   background: #ffffff;
+}
+
+.compact-picker {
+  max-width: 190px;
+}
+
+.compact-picker select {
+  max-width: 112px;
 }
 
 .toolbar-spacer {
@@ -339,6 +352,53 @@ input:focus-visible,
   font-weight: 800;
 }
 
+.box-block {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.divider-block {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.divider-block span:first-child {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.stat-block {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 2px solid;
+  border-radius: 8px;
+}
+
+.stat-block strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.stat-block span {
+  font-size: 9px;
+  font-weight: 800;
+}
+
 .text-title {
   font-size: 22px;
   color: #cf2434;
@@ -405,9 +465,27 @@ input:focus-visible,
 
 .table-block th,
 .table-block td {
+  position: relative;
   padding: 5px;
   border: 1px solid #cbd5e1;
   vertical-align: top;
+}
+
+.inline-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  min-height: 18px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #efb4bc;
+  border-radius: 999px;
+  background: #fff1f2;
+  color: #a92738;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .table-block th {
@@ -589,6 +667,19 @@ input:focus-visible,
   width: 100%;
 }
 
+.inspector select,
+.inspector input[type="color"] {
+  min-height: 40px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.compact-controls {
+  display: grid;
+  gap: 10px;
+}
+
 .swatches {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -641,7 +732,8 @@ input:focus-visible,
 }
 
 .print-block .grab-handle,
-.print-block .resize-handle {
+.print-block .resize-handle,
+.print-block .inline-remove {
   display: none;
 }
 

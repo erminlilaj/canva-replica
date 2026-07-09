@@ -17,8 +17,8 @@ export const themes: Record<ThemeId, PosterTheme> = {
   school: {
     id: "school",
     name: "Shkollë",
-    headingFont: "Arial, sans-serif",
-    bodyFont: "Arial, sans-serif",
+    headingFont: "Inter, sans-serif",
+    bodyFont: "Inter, sans-serif",
     page: "#ffffff",
     ink: "#15305b",
     muted: "#637083",
@@ -29,8 +29,8 @@ export const themes: Record<ThemeId, PosterTheme> = {
   fresh: {
     id: "fresh",
     name: "E freskët",
-    headingFont: "Trebuchet MS, sans-serif",
-    bodyFont: "Arial, sans-serif",
+    headingFont: "Source Sans 3, sans-serif",
+    bodyFont: "Source Sans 3, sans-serif",
     page: "#fbfffd",
     ink: "#143934",
     muted: "#60716d",
@@ -41,8 +41,8 @@ export const themes: Record<ThemeId, PosterTheme> = {
   warm: {
     id: "warm",
     name: "E ngrohtë",
-    headingFont: "Georgia, serif",
-    bodyFont: "Arial, sans-serif",
+    headingFont: "Merriweather, serif",
+    bodyFont: "Source Sans 3, sans-serif",
     page: "#fffdf8",
     ink: "#382b22",
     muted: "#756c63",
@@ -53,8 +53,8 @@ export const themes: Record<ThemeId, PosterTheme> = {
   formal: {
     id: "formal",
     name: "Formale",
-    headingFont: "Verdana, sans-serif",
-    bodyFont: "Arial, sans-serif",
+    headingFont: "Inter, sans-serif",
+    bodyFont: "Source Sans 3, sans-serif",
     page: "#ffffff",
     ink: "#172033",
     muted: "#667085",

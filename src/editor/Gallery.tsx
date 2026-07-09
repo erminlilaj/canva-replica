@@ -1,6 +1,7 @@
 import { FilePlus2, FolderOpen, LayoutTemplate } from "lucide-react";
 import { sq } from "../i18n/sq";
 import { riskAssessmentTemplate } from "../templates/riskAssessment";
+import { extraTemplates } from "../templates/moreTemplates";
 import { usePosterStore } from "../core/store";
 import type { PosterDoc } from "../core/types";
 
@@ -40,6 +41,15 @@ export function Gallery() {
           </span>
           <em>{sq.gallery.openTemplate}</em>
         </button>
+        {extraTemplates.map((template) => (
+          <button className="template-card" key={template.title} onClick={() => openEditor(freshCopy(template))}>
+            <LayoutTemplate size={34} />
+            <span>
+              <strong>{template.title}</strong>
+              <small>{sq.gallery.openTemplate}</small>
+            </span>
+          </button>
+        ))}
         <button className="template-card" onClick={() => openEditor(freshCopy(blankPoster))}>
           <FilePlus2 size={34} />
           <span>
