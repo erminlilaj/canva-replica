@@ -58,9 +58,9 @@ Definition of done for the whole list is unchanged from AGENTS.md §11: she can 
 
 **Problem:** resize adjusts width only (`Canvas.tsx` `moveDrag`, `mode === "resize"`), so images/boxes can't be sized vertically.
 
-- [ ] Corner (SE) handle resizes **both** w and h. For blocks whose `frame.h === "auto"` (text, tables, lists) keep height auto and let the corner handle change width only — do not force numeric heights onto content-driven blocks.
-- [ ] For `image`, `box`, `divider` (numeric h): min height 10 mm, clamp inside page (`clampFrame` currently assumes h≈20 when `"auto"` — extend it to clamp numeric h properly; add a geometry test).
-- [ ] Optional but cheap: separate E (width-only) and S (height-only) edge handles on numeric-h blocks.
+- [x] Corner (SE) handle resizes **both** w and h. For blocks whose `frame.h === "auto"` (text, tables, lists) keep height auto and let the corner handle change width only — do not force numeric heights onto content-driven blocks.
+- [x] For `image`, `box`, `divider` (numeric h): min height 10 mm, clamp inside page (`clampFrame` currently assumes h≈20 when `"auto"` — extend it to clamp numeric h properly; add a geometry test).
+- [x] Optional but cheap: separate E (width-only) and S (height-only) edge handles on numeric-h blocks.
 
 ### 6. Print correctness pass
 

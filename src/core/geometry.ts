@@ -26,12 +26,15 @@ export function snapMm(value: number, grid = 4) {
 }
 
 export function clampFrame(frame: Frame, page: { w: number; h: number }): Frame {
-  const h = typeof frame.h === "number" ? frame.h : 20;
+  const w = Math.max(28, Math.min(frame.w, page.w - 8));
+  const h = typeof frame.h === "number" ? Math.max(10, Math.min(frame.h, page.h - 8)) : frame.h;
+  const occupiedH = typeof h === "number" ? h : 20;
   return {
     ...frame,
-    x: Math.max(4, Math.min(frame.x, page.w - frame.w - 4)),
-    y: Math.max(4, Math.min(frame.y, page.h - h - 4)),
-    w: Math.max(28, Math.min(frame.w, page.w - 8)),
+    x: Math.max(4, Math.min(frame.x, page.w - w - 4)),
+    y: Math.max(4, Math.min(frame.y, page.h - occupiedH - 4)),
+    w,
+    h,
   };
 }
 

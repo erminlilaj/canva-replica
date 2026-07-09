@@ -107,7 +107,7 @@ export const usePosterStore = create<PosterState>((set, get) => ({
     set((state) => {
       const doc = replaceBlock(state.doc, id, (block) => ({ ...block, ...patch } as Block));
       if (options?.commit === false) {
-        return { doc, savedState: "saving" };
+        return { doc: touchPoster(doc), savedState: "saving" };
       }
       return withHistory(state, doc, options?.historyBase);
     }),
@@ -118,7 +118,7 @@ export const usePosterStore = create<PosterState>((set, get) => ({
         data: { ...block.data, ...data },
       } as Block));
       if (options?.commit === false) {
-        return { doc, savedState: "saving" };
+        return { doc: touchPoster(doc), savedState: "saving" };
       }
       return withHistory(state, doc, options?.historyBase);
     }),

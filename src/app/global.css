@@ -423,9 +423,24 @@ input:focus-visible,
   border-bottom: 2px solid #0f4c9a;
 }
 
-.resize-handle {
+.resize-se {
   right: -10px;
   bottom: -10px;
+  cursor: nwse-resize;
+}
+
+.resize-e {
+  right: -10px;
+  top: 50%;
+  margin-top: -9px;
+  cursor: ew-resize;
+}
+
+.resize-s {
+  bottom: -10px;
+  left: 50%;
+  margin-left: -9px;
+  cursor: ns-resize;
 }
 
 .poster-block.selected .grab-handle,

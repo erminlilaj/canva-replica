@@ -6,7 +6,7 @@ import { usePosterStore } from "../core/store";
 import type { Block, Frame, PosterDoc } from "../core/types";
 import { sq } from "../i18n/sq";
 
-type DragMode = "move" | "resize";
+type DragMode = "move" | "resize-se" | "resize-e" | "resize-s";
 
 interface DragState {
   id: string;
@@ -146,10 +146,17 @@ export function Canvas() {
     if (!drag) return;
     const dx = snapMm(pxToMm((event.clientX - drag.startX) / zoom));
     const dy = snapMm(pxToMm((event.clientY - drag.startY) / zoom));
-    const nextFrame =
-      drag.mode === "resize"
-        ? { ...drag.frame, w: Math.max(28, snapMm(drag.frame.w + dx)), h: drag.frame.h }
-        : { ...drag.frame, x: snapMm(drag.frame.x + dx), y: snapMm(drag.frame.y + dy) };
+    let nextFrame: Frame;
+    if (drag.mode === "move") {
+      nextFrame = { ...drag.frame, x: snapMm(drag.frame.x + dx), y: snapMm(drag.frame.y + dy) };
+    } else {
+      const w = drag.mode === "resize-s" ? drag.frame.w : Math.max(28, snapMm(drag.frame.w + dx));
+      const h =
+        typeof drag.frame.h === "number" && drag.mode !== "resize-e"
+          ? Math.max(10, snapMm(drag.frame.h + dy))
+          : drag.frame.h;
+      nextFrame = { ...drag.frame, w, h };
+    }
     const frame = clampFrame(nextFrame, page);
     setDrag((current) => (current ? { ...current, latestFrame: frame } : current));
     updateBlock(drag.id, { frame }, { commit: false });
@@ -238,14 +245,36 @@ export function Canvas() {
               />
               <BlockRenderer block={block} />
               <button
-                className="resize-handle"
+                className="resize-handle resize-se"
                 aria-label={sq.canvas.resize}
                 title={sq.canvas.resize}
-                onPointerDown={(event) => startDrag(event, block, "resize")}
+                onPointerDown={(event) => startDrag(event, block, "resize-se")}
                 onPointerMove={moveDrag}
                 onPointerUp={endDrag}
                 onPointerCancel={endDrag}
               />
+              {typeof block.frame.h === "number" ? (
+                <>
+                  <button
+                    className="resize-handle resize-e"
+                    aria-label={sq.canvas.resize}
+                    title={sq.canvas.resize}
+                    onPointerDown={(event) => startDrag(event, block, "resize-e")}
+                    onPointerMove={moveDrag}
+                    onPointerUp={endDrag}
+                    onPointerCancel={endDrag}
+                  />
+                  <button
+                    className="resize-handle resize-s"
+                    aria-label={sq.canvas.resize}
+                    title={sq.canvas.resize}
+                    onPointerDown={(event) => startDrag(event, block, "resize-s")}
+                    onPointerMove={moveDrag}
+                    onPointerUp={endDrag}
+                    onPointerCancel={endDrag}
+                  />
+                </>
+              ) : null}
             </div>
           ))}
         </div>
