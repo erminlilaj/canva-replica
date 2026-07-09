@@ -1,7 +1,8 @@
-import { Component, type ErrorInfo, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode, useState } from "react";
 import { Check, Image, ListChecks, Minus, Square, Table2, Target, TextCursorInput, Users, Boxes, Hash } from "lucide-react";
 import type {
   Block,
+  BlockStyleOverrides,
   BlockType,
   BoxBlock,
   ChecklistBlock,
@@ -73,10 +74,14 @@ function EditableText({
   value,
   className,
   onCommit,
+  onFocus,
+  onBlurExtra,
 }: {
   value: string;
   className?: string;
   onCommit: (value: string) => void;
+  onFocus?: () => void;
+  onBlurExtra?: () => void;
 }) {
   return (
     <span
@@ -84,15 +89,65 @@ function EditableText({
       contentEditable
       suppressContentEditableWarning
       onPointerDown={(event) => event.stopPropagation()}
+      onFocus={onFocus}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
           event.currentTarget.blur();
         }
       }}
-      onBlur={(event) => onCommit(event.currentTarget.innerText.trim())}
+      onBlur={(event) => {
+        onCommit(event.currentTarget.innerText.trim());
+        onBlurExtra?.();
+      }}
     >
       {value}
     </span>
+  );
+}
+
+function FloatingTextBar({ block }: { block: TextBlock }) {
+  const updateBlock = usePosterStore((state) => state.updateBlock);
+  const theme = themes[usePosterStore((state) => state.doc.theme)];
+  const setSize = (size: BlockStyleOverrides["size"]) => updateBlock(block.id, { style: { ...block.style, size } });
+  const setAlign = (align: BlockStyleOverrides["align"]) => updateBlock(block.id, { style: { ...block.style, align } });
+  const setColorSlot = (colorSlot: number) => updateBlock(block.id, { style: { ...block.style, colorSlot, accent: undefined } });
+  return (
+    <div className="floating-text-bar" onPointerDown={(event) => event.preventDefault()}>
+      <div className="floating-text-group">
+        <button type="button" aria-pressed={(block.style?.size ?? "body") === "title"} onClick={() => setSize("title")}>
+          {sq.inspector.titleSize}
+        </button>
+        <button type="button" aria-pressed={(block.style?.size ?? "body") === "subtitle"} onClick={() => setSize("subtitle")}>
+          {sq.inspector.subtitleSize}
+        </button>
+        <button type="button" aria-pressed={(block.style?.size ?? "body") === "body"} onClick={() => setSize("body")}>
+          {sq.inspector.bodySize}
+        </button>
+      </div>
+      <div className="floating-text-group">
+        <button type="button" aria-pressed={(block.style?.align ?? "left") === "left"} onClick={() => setAlign("left")}>
+          {sq.inspector.left}
+        </button>
+        <button type="button" aria-pressed={(block.style?.align ?? "left") === "center"} onClick={() => setAlign("center")}>
+          {sq.inspector.center}
+        </button>
+        <button type="button" aria-pressed={(block.style?.align ?? "left") === "right"} onClick={() => setAlign("right")}>
+          {sq.inspector.right}
+        </button>
+      </div>
+      <div className="floating-text-swatches">
+        {theme.slots.map((slot, index) => (
+          <button
+            key={slot}
+            type="button"
+            className={block.style?.colorSlot === index ? "active" : ""}
+            style={{ background: slot }}
+            aria-label={`${sq.inspector.color} ${index + 1}`}
+            onClick={() => setColorSlot(index)}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -111,9 +166,16 @@ function TextRenderer({ block }: { block: TextBlock }) {
   const update = usePosterStore((state) => state.updateBlockData);
   const bodyFont = usePosterStore((state) => state.doc.fonts?.body);
   const fontFamily = block.style?.fontFamily ?? bodyFont;
+  const [editing, setEditing] = useState(false);
   return (
     <div className={`text-block text-${block.style?.size ?? "body"} align-${block.style?.align ?? "left"}`} style={{ fontFamily }}>
-      <EditableText value={block.data.text} onCommit={(text) => update<TextBlock>(block.id, { text })} />
+      {editing ? <FloatingTextBar block={block} /> : null}
+      <EditableText
+        value={block.data.text}
+        onCommit={(text) => update<TextBlock>(block.id, { text })}
+        onFocus={() => setEditing(true)}
+        onBlurExtra={() => setEditing(false)}
+      />
     </div>
   );
 }

@@ -487,10 +487,74 @@ input:focus-visible,
 }
 
 .text-block {
+  position: relative;
   width: 100%;
   white-space: pre-line;
   line-height: 1.25;
   font-weight: 800;
+}
+
+.floating-text-bar {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 6px;
+  border: 1px solid #d8e0ea;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(20, 31, 47, 0.16);
+  white-space: nowrap;
+}
+
+.floating-text-group {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.floating-text-group button {
+  min-height: 32px;
+  min-width: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.floating-text-group button[aria-pressed="true"] {
+  background: #eaf2ff;
+  color: #0f4c9a;
+}
+
+.floating-text-swatches {
+  display: flex;
+  gap: 6px;
+  padding: 2px;
+}
+
+.floating-text-swatches button {
+  min-width: 22px;
+  min-height: 22px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.floating-text-swatches button.active {
+  box-shadow: 0 0 0 2px #172033;
+}
+
+.print-block .floating-text-bar {
+  display: none;
 }
 
 .box-block {
